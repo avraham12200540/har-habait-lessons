@@ -22,6 +22,9 @@
   <div id="log"></div>
 </div>
 
+<button id="logout-btn">התנתק</button>
+
+
 <div id="admin-section" style="display:none;">
   <h2>הוסף שיעור חדש</h2>
   <input type="text" id="title" placeholder="שם השיעור"><br>
@@ -163,5 +166,24 @@ window.editLesson = function(id){
   .catch(err => log.innerHTML = "שגיאה בעדכון: " + err.message);
 };
 </script>
+
+
+<script>
+  const logoutBtn = document.getElementById('logout-btn');
+
+  logoutBtn.addEventListener('click', () => {
+    firebase.auth().signOut()
+      .then(() => {
+        // משתמש יצא בהצלחה, מחזירים לדף הכניסה
+        window.location.href = 'admin.html'; // שנה לכתובת של מסך הכניסה שלך
+      })
+      .catch((error) => {
+        console.error("שגיאה בהתנתקות:", error);
+        alert("אירעה שגיאה בעת ההתנתקות. נסה שוב.");
+      });
+  });
+</script>
+
+
 </body>
 </html>
