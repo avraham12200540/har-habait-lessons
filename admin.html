@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ממשק מנהל – שיעורים</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+<a href="index.html" style="display:inline-block; margin:10px; padding:5px 10px; background:#4a90e2; color:white; border-radius:5px; text-decoration:none; font-size:0.9em;">חזרה לאינדקס</a>
+
+<h1>ממשק מנהל – שיעורים</h1>
+
+<div id="login-section">
+  <input type="email" id="email" placeholder="אימייל"><br>
+  <input type="password" id="password" placeholder="סיסמה"><br>
+  <button id="login-btn">התחבר</button>
+  <div id="log"></div>
+</div>
+
+<div id="admin-section" style="display:none;">
+  <h2>הוסף שיעור חדש</h2>
+  <input type="text" id="title" placeholder="שם השיעור"><br>
+  <input type="text" id="rabbi" placeholder="שם הרב"><br>
+  <input type="text" id="youtube" placeholder="קישור יוטיוב"><br>
+  <select id="category">
+    <option value="">לא סווג</option>
+    <option value="הלכה">הלכה</option>
+    <option value="היסטוריה">היסטוריה</option>
+    <option value="פרשת השבוע">פרשת השבוע</option>
+  </select><br>
+  <button id="add-lesson-btn">הוסף שיעור</button>
+
+  <h2>שיעורים קיימים</h2>
+  <div id="lessons-list"></div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyA9CHKDvVmhPSv6U2UpVj-QGyriF5QDjk0",
+  authDomain: "har-habait-lessons.firebaseapp.com",
+  projectId: "har-habait-lessons",
+  storageBucket: "har-habait-lessons.appspot.com",
+  messagingSenderId: "518010109655",
+  appId: "1:518010109655:web:cd628123d6769aa87a7a92",
+  measurementId: "G-RSNSTT3QL8"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+const loginSection = document.getElementById('login-section');
+const adminSection = document.getElementById('admin-section');
+const log = document.getElementById('log');
+let allLessons = [];
+
+document.getElementById('login-btn').onclick = () => {
+  const email = document.getElementById('email').value;
+  const password = document.getElementById('password').value;
+  log.innerHTML = "מנסה להתחבר...";
+  auth.signInWithEmailAndPassword(email, password)
+    .then(() => log.innerHTML = "התחברת בהצלחה!")
+    .catch(err => log.innerHTML = "שגיאה בהתחברות: " + err.message);
+};
+
+auth.onAuthStateChanged(user => {
+  if(user){
+    loginSection.style.display = 'none';
+    adminSection.style.display = 'block';
+    log.innerHTML = "מחובר כ: " + user.email;
+    loadLessons();
+  } else {
+    loginSection.style.display = 'block';
+    adminSection.style.display = 'none';
+    log.innerHTML = "";
+  }
+});
+
+document.getElementById('add-lesson-btn').onclick = () => {
+  const title = document.getElementById('title').value.trim();
+  const rabbi = document.getElementById('rabbi').value.trim();
+  const youtube = document.getElementById('youtube').value.trim();
+  const category = document.getElementById('category').value;
+
+  if(!title || !rabbi || !youtube){
+    log.innerHTML = "אנא מלא את כל השדות!";
+    return;
+  }
+
+  log.innerHTML = "מנסה להוסיף שיעור...";
+  db.collection("lessons").add({
+    title,
+    rabbi,
+    youtube,
+    category,
+    timestamp: firebase.firestore.FieldValue.serverTimestamp()
+  })
+  .then(docRef => {
+    log.innerHTML = "השיעור נוסף בהצלחה! (ID: " + docRef.id + ")";
+    document.getElementById('title').value = "";
+    document.getElementById('rabbi').value = "";
+    document.getElementById('youtube').value = "";
+    document.getElementById('category').value = "";
+  })
+  .catch(err => log.innerHTML = "שגיאה בהוספה: " + err.message);
+};
+
+function loadLessons(){
+  db.collection("lessons").orderBy("timestamp","desc").onSnapshot(snapshot => {
+    allLessons = [];
+    const list = document.getElementById('lessons-list');
+    list.innerHTML = '';
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      data.id = doc.id;
+      allLessons.push(data);
+      const div = document.createElement('div');
+      div.className = 'lesson-item';
+      let dateStr = data.timestamp ? new Date(data.timestamp.seconds*1000).toLocaleDateString('he-IL') : 'לא זמין';
+      div.innerHTML = `
+        ${data.title} - ${data.rabbi} [${data.category || "לא סווג"}] - ${dateStr}
+        <button onclick="editLesson('${doc.id}')">ערוך</button>
+        <button onclick="deleteLesson('${doc.id}')">מחק</button>
+      `;
+      list.appendChild(div);
+    });
+  });
+}
+
+window.deleteLesson = function(id){
+  db.collection("lessons").doc(id).delete()
+    .then(() => log.innerHTML = "השיעור נמחק בהצלחה! (ID: " + id + ")")
+    .catch(err => log.innerHTML = "שגיאה במחיקה: " + err.message);
+};
+
+window.editLesson = function(id){
+  const lesson = allLessons.find(l => l.id === id);
+  if(!lesson) return;
+
+  const newTitle = prompt("שם השיעור:", lesson.title);
+  if(newTitle === null) return;
+
+  const newRabbi = prompt("שם הרב:", lesson.rabbi);
+  if(newRabbi === null) return;
+
+  const newYoutube = prompt("קישור יוטיוב:", lesson.youtube);
+  if(newYoutube === null) return;
+
+  const newCategory = prompt("קטגוריה:", lesson.category || "");
+  if(newCategory === null) return;
+
+  db.collection("lessons").doc(id).update({
+    title: newTitle,
+    rabbi: newRabbi,
+    youtube: newYoutube,
+    category: newCategory
+  })
+  .then(() => log.innerHTML = "השיעור עודכן בהצלחה!")
+  .catch(err => log.innerHTML = "שגיאה בעדכון: " + err.message);
+};
+</script>
+</body>
+</html>

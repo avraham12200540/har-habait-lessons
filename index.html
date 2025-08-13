@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>מרכז שיעורי הר הבית</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
+<style>
+
+
+.background-image {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: url('1.png') center center / cover no-repeat;
+  opacity: 0.3;  /* שקיפות */
+  z-index: -1;    /* מאחורי כל האלמנטים */
+}
+
+
+
+
+/* סגנון רשימת שיעורים קומפקטית */
+.lesson-card {
+  background: white;
+  margin: 10px auto;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  max-width: 500px;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  cursor: pointer;
+}
+.lesson-card img {
+  width: 120px;
+  height: 90px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* מודאל */
+.modal {
+  display: none;
+  position: fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(5px);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.modal.show {
+  display: flex;
+  opacity: 1;
+}
+.modal-content {
+  position: relative;
+  width: 80%;
+  max-width: 800px;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+}
+.modal.show .modal-content {
+  transform: scale(1);
+}
+@media (max-height: 700px) {
+  .modal-content {
+    height: 80%;
+  }
+  #modal-video {
+    height: 100%;
+  }
+}
+#close-modal {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  font-size: 1.5em;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+/* קלטים וכפתורים */
+input, button, select {
+  margin: 5px;
+  padding: 8px;
+  width: 90%;
+  max-width: 400px;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+button {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+button:hover {
+  background: #357abd;
+}
+</style>
+</head>
+<body>
+
+  <div class="background-image"></div>
+
+
+<header>
+  <h1>מרכז שיעורי הר הבית</h1>
+  <a href="admin.html" class="admin-link">כניסת מנהל</a>
+</header>
+
+<div style="display:flex; gap:10px; margin-bottom:20px;">
+  <input type="text" id="search" placeholder="חפש לפי שם שיעור או שם הרב..." style="flex:1;">
+  <select id="sort-select">
+    <option value="date">מיון לפי תאריך</option>
+    <option value="title">מיון לפי שם השיעור</option>
+  </select>
+  <select id="category-select">
+    <option value="">כל הקטגוריות</option>
+    <option value="הלכה">הלכה</option>
+    <option value="היסטוריה">היסטוריה</option>
+    <option value="פרשת השבוע">פרשת השבוע</option>
+  </select>
+</div>
+
+<main id="lessons-container"></main>
+
+<!-- מודאל במרכז המסך -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <span id="close-modal">&times;</span>
+    <iframe id="modal-video" width="100%" height="450px" frameborder="0" allowfullscreen></iframe>
+  </div>
+</div>
+
+<script>
+const firebaseConfig = {
+  apiKey: "AIzaSyA9CHKDvVmhPSv6U2UpVj-QGyriF5QDjk0",
+  authDomain: "har-habait-lessons.firebaseapp.com",
+  projectId: "har-habait-lessons",
+  storageBucket: "har-habait-lessons.appspot.com",
+  messagingSenderId: "518010109655",
+  appId: "1:518010109655:web:cd628123d6769aa87a7a92",
+  measurementId: "G-RSNSTT3QL8"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const container = document.getElementById('lessons-container');
+const modal = document.getElementById('modal');
+const modalVideo = document.getElementById('modal-video');
+const closeModal = document.getElementById('close-modal');
+const searchInput = document.getElementById('search');
+const sortSelect = document.getElementById('sort-select');
+const categorySelect = document.getElementById('category-select');
+
+function getYouTubeId(url) {
+  const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/;
+  const match = url?.match(regExp);
+  return (match && match[2]?.length === 11) ? match[2] : null;
+}
+
+function normalizeText(str) {
+  return str ? str.trim().toLowerCase() : "";
+}
+
+let allLessons = [];
+
+// טעינת שיעורים
+db.collection("lessons").onSnapshot(snapshot => {
+  allLessons = [];
+  snapshot.forEach(doc => {
+    const data = doc.data();
+    data.id = doc.id;
+    allLessons.push(data);
+  });
+  filterAndSortLessons();
+});
+
+function renderLessons(lessons) {
+  container.innerHTML = '';
+  lessons.forEach(data => {
+    const videoID = getYouTubeId(data.youtube);
+
+    let dateStr = "לא זמין";
+    if(data.timestamp) {
+      const date = data.timestamp.toDate();
+      dateStr = date.toLocaleDateString('he-IL', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    }
+
+    const lessonDiv = document.createElement('div');
+    lessonDiv.className = 'lesson-card';
+    lessonDiv.innerHTML = `
+      <img src="https://img.youtube.com/vi/${videoID}/hqdefault.jpg" alt="${data.title || ""}">
+      <div>
+        <h3>${data.title || ""}</h3>
+        <p><strong>הרב:</strong> ${data.rabbi || ""}</p>
+        <p><strong>קטגוריה:</strong> ${data.category || "לא סווג"}</p>
+        <p><strong>תאריך:</strong> ${dateStr}</p>
+      </div>
+    `;
+
+    // פתיחת המודאל במרכז
+    lessonDiv.onclick = () => {
+      if(videoID) {
+        modalVideo.src = `https://www.youtube.com/embed/${videoID}`;
+        modal.classList.add('show');
+      }
+    };
+
+    container.appendChild(lessonDiv);
+  });
+}
+
+function filterAndSortLessons() {
+  const queryWords = normalizeText(searchInput.value).split(" ").filter(w => w);
+  const selectedCategory = categorySelect.value;
+  const sortBy = sortSelect.value;
+
+  let filtered = allLessons.filter(lesson => {
+    const text = normalizeText(`${lesson.title || ""} ${lesson.rabbi || ""}`);
+    const matchesSearch = queryWords.every(word => text.includes(word));
+    const matchesCategory = !selectedCategory || lesson.category === selectedCategory;
+    return matchesSearch && matchesCategory;
+  });
+
+  if(sortBy === "title") {
+    filtered.sort((a,b) => (a.title || "").localeCompare(b.title || ""));
+  } else if(sortBy === "date") {
+    filtered.sort((a,b) => {
+      const aTime = a.timestamp ? a.timestamp.seconds : 0;
+      const bTime = b.timestamp ? b.timestamp.seconds : 0;
+      return bTime - aTime; // הכי עדכני ראשון
+    });
+  }
+
+  renderLessons(filtered);
+}
+
+searchInput.addEventListener('input', filterAndSortLessons);
+sortSelect.addEventListener('change', filterAndSortLessons);
+categorySelect.addEventListener('change', filterAndSortLessons);
+
+// סגירת מודאל
+function closeLesson() {
+  modal.classList.remove('show');
+  setTimeout(() => {
+    modalVideo.src = "";
+  }, 300);
+}
+closeModal.onclick = closeLesson;
+modal.addEventListener('click', (e) => {
+  if(e.target === modal) closeLesson();
+});
+</script>
+</body>
+</html>

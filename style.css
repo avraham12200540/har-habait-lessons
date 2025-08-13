@@ -1,0 +1,180 @@
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f7f9fc;
+  color: #333;
+  margin: 0;
+  padding: 0;
+
+.main-content {
+  background: 
+    linear-gradient(rgba(255,255,255,0.6), rgba(255,255,255,0.6)),
+    url('1.png') no-repeat center center fixed;
+  background-size: cover;
+  padding: 20px;
+}
+
+
+}
+
+header {
+  background: #4a90e2;
+  color: white;
+  padding: 15px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+}
+
+.admin-link {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  color: white;
+  text-decoration: none;
+  background: rgba(255,255,255,0.2);
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+
+.lesson-card {
+  background: white;
+  margin: 10px auto;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  max-width: 400px;
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.lesson-card:hover {
+  transform: scale(1.02);
+}
+
+.lesson-card img {
+  width: 120px;
+  height: 90px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
+.lesson-card h2 {
+  font-size: 1em;
+  margin: 0 0 5px 0;
+}
+
+.lesson-card p {
+  margin: 2px 0;
+  font-size: 0.85em;
+}
+
+/* תצוגה של 3 שיעורים בשורה */
+#lessons-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 15px;
+  padding: 10px;
+}
+
+.lesson-card {
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column; /* תמונה למעלה, פרטים למטה */
+  cursor: pointer;
+  text-align: center;
+}
+
+.lesson-card img {
+  width: 100%;
+  height: 150px;
+  object-fit: cover;
+  border-radius: 8px;
+  margin-bottom: 10px;
+}
+
+
+input, button, select {
+  margin: 5px;
+  padding: 8px;
+  width: 90%;
+  max-width: 400px;
+}
+
+button {
+  background: #4a90e2;
+  color: white;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #357abd;
+}
+
+.lesson-item button {
+  margin-left: 5px;
+  font-size: 0.8em;
+}
+
+.modal {
+  display: none;
+  position: fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.7); /* כהה יותר לרקע */
+  backdrop-filter: blur(5px); /* מטושטש */
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+
+.modal.show {
+  display: flex;
+  opacity: 1;
+}
+
+.modal-content {
+  position: relative;
+  width: 80%;
+  max-width: 800px;
+  background: white;
+  padding: 10px;
+  border-radius: 10px;
+  transform: scale(0.8);
+  transition: transform 0.3s ease;
+}
+
+.modal.show .modal-content {
+  transform: scale(1);
+}
+
+/* מתאימה לגובה מסך קטן */
+@media (max-height: 700px) {
+  .modal-content {
+    height: 80%;
+  }
+  #modal-video {
+    height: 100%;
+  }
+}
+
+#close-modal {
+  position: absolute;
+  top: 5px;
+  right: 10px;
+  font-size: 1.5em;
+  font-weight: bold;
+  cursor: pointer;
+}
