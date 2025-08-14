@@ -5,141 +5,82 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>מרכז שיעורי הר הבית</title>
 <link rel="stylesheet" href="style.css">
+
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
-
-<!-- סמליל ראשי -->
+<!-- סמלילים -->
 <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-
-<!-- סמליל לאייפון ואייפד -->
 <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
-
-<!-- סמליל עבור דפדפנים ישנים / fallback -->
 <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
 
-
-
 <style>
-
-
+/* רקע כללי */
 .background-image {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: url('1.png') center center / cover no-repeat;
-  opacity: 0.3;  /* שקיפות */
-  z-index: -1;    /* מאחורי כל האלמנטים */
+  opacity: 0.3; z-index: -1;
 }
 
-
-
-
-/* סגנון רשימת שיעורים קומפקטית */
-.lesson-card {
-  background: white;
-  margin: 10px auto;
-  padding: 10px;
-  border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-  max-width: 500px;
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  cursor: pointer;
+/* סיכומים וכפתורים */
+.modal-content--summary { max-height: 80vh; overflow:auto; }
+.summary-btn {
+  background: #ff9800; color: #fff; border: none;
+  padding: 6px 10px; border-radius: 6px; cursor: pointer;
+  font-size: 0.9em; margin-top: 6px;
 }
-.lesson-card img {
-  width: 120px;
-  height: 90px;
-  object-fit: cover;
-  border-radius: 8px;
-}
+.summary-btn:hover { background:#e68900; }
+.lesson-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
 
 /* מודאל */
 .modal {
   display: none;
   position: fixed;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
-  background: rgba(0,0,0,0.7);
-  backdrop-filter: blur(5px);
-  justify-content: center;
-  align-items: center;
+  top:0; left:0; width:100%; height:100%;
+  background: rgba(0,0,0,0.5);
+  justify-content: center; align-items: center;
   z-index: 1000;
-  opacity: 0;
-  transition: opacity 0.3s ease;
 }
-.modal.show {
-  display: flex;
-  opacity: 1;
-}
+.modal.show { display: flex; }
+
 .modal-content {
   position: relative;
-  width: 80%;
-  max-width: 800px;
-  background: white;
-  padding: 10px;
-  border-radius: 10px;
-  transform: scale(0.8);
-  transition: transform 0.3s ease;
-}
-.modal.show .modal-content {
-  transform: scale(1);
-}
-@media (max-height: 700px) {
-  .modal-content {
-    height: 80%;
-  }
-  #modal-video {
-    height: 100%;
-  }
-}
-#close-modal {
-  position: absolute;
-  top: 5px;
-  right: 10px;
-  font-size: 1.5em;
-  font-weight: bold;
-  cursor: pointer;
+  background: #fff;
+  padding: 20px;
+  max-width: 90%;
+  max-height: 90%;
+  overflow:auto;
+  border-radius: 8px;
 }
 
-/* קלטים וכפתורים */
-input, button, select {
-  margin: 5px;
-  padding: 8px;
-  width: 90%;
-  max-width: 400px;
-  border-radius: 5px;
-  border: 1px solid #ccc;
-}
-button {
-  background: #4a90e2;
-  color: white;
+/* כפתור סגירה מינימלי */
+.modal-close {
+  font-size: 1.2rem;
+  color: #555;
+  background: transparent;
   border: none;
   cursor: pointer;
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  line-height: 1;
 }
-button:hover {
-  background: #357abd;
-}
+.modal-close:hover { color: #000; }
 </style>
 </head>
 <body>
 
-  <div class="background-image"></div>
-
+<div class="background-image"></div>
 
 <header>
   <h1>מרכז שיעורי הר הבית</h1>
   <a href="admin.html" class="admin-link">כניסת מנהל</a>
 </header>
 
-<div style="display:flex; gap:10px; margin-bottom:20px;">
+<div style="display:flex; gap:10px; margin-bottom:20px; padding:0 10px;">
   <input type="text" id="search" placeholder="חפש לפי שם שיעור או שם הרב..." style="flex:1;">
   <select id="sort-select">
     <option value="date">מיון לפי תאריך</option>
@@ -155,15 +96,24 @@ button:hover {
 
 <main id="lessons-container"></main>
 
-<!-- מודאל במרכז המסך -->
-<div id="modal" class="modal">
+<!-- מודאל וידאו -->
+<div id="modal" class="modal" aria-hidden="true">
   <div class="modal-content">
-    <span id="close-modal">&times;</span>
-    <iframe id="modal-video" width="100%" height="450px" frameborder="0" allowfullscreen></iframe>
+    <button id="close-modal" class="modal-close" aria-label="סגור">×</button>
+    <iframe id="modal-video" width="100%" height="450" frameborder="0" allowfullscreen></iframe>
+  </div>
+</div>
+
+<!-- מודאל סיכום -->
+<div id="summary-modal" class="modal" aria-hidden="true">
+  <div class="modal-content modal-content--summary">
+    <button id="close-summary-modal" class="modal-close" aria-label="סגור">×</button>
+    <div id="summary-content"></div>
   </div>
 </div>
 
 <script>
+/* Firebase init */
 const firebaseConfig = {
   apiKey: "AIzaSyA9CHKDvVmhPSv6U2UpVj-QGyriF5QDjk0",
   authDomain: "har-habait-lessons.firebaseapp.com",
@@ -176,27 +126,26 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+/* Elements */
 const container = document.getElementById('lessons-container');
 const modal = document.getElementById('modal');
 const modalVideo = document.getElementById('modal-video');
 const closeModal = document.getElementById('close-modal');
-const searchInput = document.getElementById('search');
-const sortSelect = document.getElementById('sort-select');
-const categorySelect = document.getElementById('category-select');
+
+const summaryModal = document.getElementById('summary-modal');
+const summaryContent = document.getElementById('summary-content');
+const closeSummaryModal = document.getElementById('close-summary-modal');
 
 function getYouTubeId(url) {
-  const regExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=)([^#\&\?]*).*/;
+  const regExp = /^.*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|watch\?.+&v=)([^#\&\?]{11}).*/;
   const match = url?.match(regExp);
-  return (match && match[2]?.length === 11) ? match[2] : null;
+  return (match && match[1]) ? match[1] : null;
 }
-
-function normalizeText(str) {
-  return str ? str.trim().toLowerCase() : "";
-}
+function normalizeText(str) { return str ? str.trim().toLowerCase() : ""; }
 
 let allLessons = [];
 
-// טעינת שיעורים
+/* Load lessons */
 db.collection("lessons").onSnapshot(snapshot => {
   allLessons = [];
   snapshot.forEach(doc => {
@@ -211,81 +160,117 @@ function renderLessons(lessons) {
   container.innerHTML = '';
   lessons.forEach(data => {
     const videoID = getYouTubeId(data.youtube);
-
     let dateStr = "לא זמין";
-    if(data.timestamp) {
+    if (data.timestamp?.toDate) {
       const date = data.timestamp.toDate();
-      dateStr = date.toLocaleDateString('he-IL', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric'
-      });
+      dateStr = date.toLocaleDateString('he-IL', { year:'numeric', month:'long', day:'numeric' });
+    } else if (data.timestamp?.seconds) {
+      const date = new Date(data.timestamp.seconds * 1000);
+      dateStr = date.toLocaleDateString('he-IL', { year:'numeric', month:'long', day:'numeric' });
     }
 
     const lessonDiv = document.createElement('div');
     lessonDiv.className = 'lesson-card';
+    lessonDiv.dataset.id = data.id;
+
     lessonDiv.innerHTML = `
-      <img src="https://img.youtube.com/vi/${videoID}/hqdefault.jpg" alt="${data.title || ""}">
-      <div>
+      <img src="${videoID ? `https://img.youtube.com/vi/${videoID}/hqdefault.jpg` : 'https://via.placeholder.com/320x180?text=No+Image'}" alt="${data.title || ""}">
+      <div class="lesson-meta">
         <h3>${data.title || ""}</h3>
         <p><strong>הרב:</strong> ${data.rabbi || ""}</p>
         <p><strong>קטגוריה:</strong> ${data.category || "לא סווג"}</p>
         <p><strong>תאריך:</strong> ${dateStr}</p>
+        <div class="lesson-actions">
+          ${videoID ? `<button class="watch-btn" data-id="${data.id}">צפייה</button>` : ""}
+          ${data.summary ? `<button class="summary-btn" data-id="${data.id}">הצגת סיכום</button>` : ""}
+        </div>
       </div>
     `;
-
-    // פתיחת המודאל במרכז
-    lessonDiv.onclick = () => {
-      if(videoID) {
-        modalVideo.src = `https://www.youtube.com/embed/${videoID}`;
-        modal.classList.add('show');
-      }
-    };
-
     container.appendChild(lessonDiv);
   });
 }
 
-function filterAndSortLessons() {
-  const queryWords = normalizeText(searchInput.value).split(" ").filter(w => w);
-  const selectedCategory = categorySelect.value;
-  const sortBy = sortSelect.value;
+/* Delegated clicks for buttons */
+container.addEventListener('click', (e) => {
+  const id = e.target.dataset?.id;
 
-  let filtered = allLessons.filter(lesson => {
-    const text = normalizeText(`${lesson.title || ""} ${lesson.rabbi || ""}`);
-    const matchesSearch = queryWords.every(word => text.includes(word));
-    const matchesCategory = !selectedCategory || lesson.category === selectedCategory;
+  if (e.target.classList.contains('watch-btn')) {
+    e.stopPropagation();
+    const lesson = allLessons.find(l => l.id === id);
+    const videoID = getYouTubeId(lesson?.youtube);
+    if (videoID) {
+      modalVideo.src = `https://www.youtube.com/embed/${videoID}`;
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden', 'false');
+    }
+  }
+
+  if (e.target.classList.contains('summary-btn')) {
+    e.stopPropagation();
+    const lesson = allLessons.find(l => l.id === id);
+    if (lesson?.summary) {
+      summaryContent.innerHTML = lesson.summary;
+      summaryModal.classList.add('show');
+      summaryModal.setAttribute('aria-hidden', 'false');
+    }
+  }
+});
+
+/* Clicking a whole card opens the video (אם יש), אבל לא אם לחיצה על כפתור */
+container.addEventListener('click', (e) => {
+  if (e.target.closest('button')) return;
+  const card = e.target.closest('.lesson-card');
+  if (!card) return;
+  const lesson = allLessons.find(l => l.id === card.dataset.id);
+  const videoID = getYouTubeId(lesson?.youtube);
+  if (videoID) {
+    modalVideo.src = `https://www.youtube.com/embed/${videoID}`;
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden', 'false');
+  }
+});
+
+function filterAndSortLessons() {
+  const searchTerm = normalizeText(searchInput.value);
+  const category = categorySelect.value;
+  const sortType = sortSelect.value;
+
+  let filtered = allLessons.filter(l => {
+    const matchesSearch = normalizeText(l.title).includes(searchTerm) || normalizeText(l.rabbi).includes(searchTerm);
+    const matchesCategory = category ? l.category === category : true;
     return matchesSearch && matchesCategory;
   });
 
-  if(sortBy === "title") {
-    filtered.sort((a,b) => (a.title || "").localeCompare(b.title || ""));
-  } else if(sortBy === "date") {
-    filtered.sort((a,b) => {
-      const aTime = a.timestamp ? a.timestamp.seconds : 0;
-      const bTime = b.timestamp ? b.timestamp.seconds : 0;
-      return bTime - aTime; // הכי עדכני ראשון
-    });
-  }
+  if (sortType === 'title') filtered.sort((a,b)=> (a.title||"").localeCompare(b.title||""));
+  else if (sortType === 'date') filtered.sort((a,b)=> (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
 
   renderLessons(filtered);
 }
+
+/* Inputs */
+const searchInput = document.getElementById('search');
+const sortSelect = document.getElementById('sort-select');
+const categorySelect = document.getElementById('category-select');
 
 searchInput.addEventListener('input', filterAndSortLessons);
 sortSelect.addEventListener('change', filterAndSortLessons);
 categorySelect.addEventListener('change', filterAndSortLessons);
 
-// סגירת מודאל
-function closeLesson() {
+/* Modal close */
+closeModal.addEventListener('click', () => {
+  modalVideo.src = '';
   modal.classList.remove('show');
-  setTimeout(() => {
-    modalVideo.src = "";
-  }, 300);
-}
-closeModal.onclick = closeLesson;
-modal.addEventListener('click', (e) => {
-  if(e.target === modal) closeLesson();
+  modal.setAttribute('aria-hidden', 'true');
 });
+closeSummaryModal.addEventListener('click', () => {
+  summaryModal.classList.remove('show');
+  summaryModal.setAttribute('aria-hidden', 'true');
+});
+
+/* Click outside content closes */
+modal.addEventListener('click', (e) => { if (e.target===modal){ modalVideo.src=''; modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }});
+summaryModal.addEventListener('click', (e) => { if (e.target===summaryModal){ summaryModal.classList.remove('show'); summaryModal.setAttribute('aria-hidden','true'); }});
 </script>
+
 </body>
 </html>
