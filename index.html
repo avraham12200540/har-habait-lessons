@@ -36,6 +36,8 @@
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 
 <header>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+
   <img src="logo.png" alt="לוגו האתר" class="site-logo">
   <h1>מרכז שיעורי הר הבית</h1>
   <a href="admin.html" class="admin-link">כניסת מנהל</a>
@@ -93,7 +95,7 @@ h1 {
 
 <div class="search-background">
   <div class="search-container">
-    <input type="text" id="search" placeholder="חפש לפי שם שיעור או שם הרב...">
+    <input type="text" id="search" placeholder="חפש לפי נושא, שם שיעור או שם הרב...">
   </div>
 </div>
 
@@ -164,6 +166,7 @@ h1 {
 </div>
 
 <script>
+/* === Firebase config (ללא שינוי) === */
 const firebaseConfig = {
   apiKey: "AIzaSyA9CHKDvVmhPSv6U2UpVj-QGyriF5QDjk0",
   authDomain: "har-habait-lessons.firebaseapp.com",
@@ -176,7 +179,11 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
+/* === אלמנטים מהדף (מוקדם כדי שלא תהיה בעיית טעינה) === */
 const container = document.getElementById('lessons-container');
+const searchInput = document.getElementById('search');
+const categorySelect = document.getElementById('category-select');
+
 const modal = document.getElementById('modal');
 const modalVideo = document.getElementById('modal-video');
 const closeModal = document.getElementById('close-modal');
@@ -184,32 +191,75 @@ const summaryModal = document.getElementById('summary-modal');
 const summaryContent = document.getElementById('summary-content');
 const closeSummaryModal = document.getElementById('close-summary-modal');
 
+/* === פונקציות עזר קצרות === */
 function getYouTubeId(url) {
   const regExp = /^.*(?:youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|watch\?.+&v=)([^#\&\?]{11}).*/;
   const match = url?.match(regExp);
   return (match && match[1]) ? match[1] : null;
 }
-function normalizeText(str) { return str ? str.trim().toLowerCase() : ""; }
 
+/* מסיר ניקוד, סימני פיסוק מיותרים ורווחים כפולים – כדי לשפר חיפוש בעברית */
+function normalizeHebrewBasic(str) {
+  if (!str) return "";
+  return String(str)
+    .normalize("NFKD")
+    .replace(/[\u0591-\u05C7]/g, "")         // ניקוד וטעמי מקרא
+    .replace(/<[^>]+>/g, " ")                 // הסרת תגיות HTML אם יש בסיכום
+    .replace(/[\"'’”“.,!?()\-–—:;[\]{}]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
+    .toLowerCase();
+}
+
+/* === נתונים מהפיירבייס + Fuse (המנוע חיפוש) === */
 let allLessons = [];
+let fuse = null;
 
 db.collection("lessons").onSnapshot(snapshot => {
-  allLessons = [];
+  const arr = [];
   snapshot.forEach(doc => {
-    const data = doc.data();
-    data.id = doc.id;
-    allLessons.push(data);
+    const d = doc.data();
+    d.id = doc.id;
+
+    // שדות "מנורמלים" לצורך חיפוש חכם
+    d.titleNorm   = normalizeHebrewBasic(d.title);
+    d.rabbiNorm   = normalizeHebrewBasic(d.rabbi);
+    d.categoryNorm= normalizeHebrewBasic(d.category);
+    d.summaryNorm = normalizeHebrewBasic(d.summary);
+
+    arr.push(d);
   });
+
+  allLessons = arr;
+
+  // יצירת אינדקס לחיפוש חכם
+  fuse = new Fuse(allLessons, {
+    keys: [
+      { name: 'titleNorm',    weight: 0.5 },
+      { name: 'summaryNorm',  weight: 0.6 },
+      { name: 'rabbiNorm',    weight: 0.4 },
+      { name: 'categoryNorm', weight: 0.2 },
+    ],
+    includeScore: true,
+    threshold: 0.35,        // כמה "סלחני" לשגיאות (קטן=קשיח, גדול=סלחני)
+    ignoreLocation: true,
+    minMatchCharLength: 2
+  });
+
   filterAndSortLessons();
 });
 
+/* === ציור הכרטיסים === */
 function renderLessons(lessons) {
   container.innerHTML = '';
   lessons.forEach(data => {
     const videoID = getYouTubeId(data.youtube);
     let dateStr = "לא זמין";
-    if (data.timestamp?.toDate) dateStr = data.timestamp.toDate().toLocaleDateString('he-IL', { year:'numeric', month:'long', day:'numeric' });
-    else if (data.timestamp?.seconds) dateStr = new Date(data.timestamp.seconds*1000).toLocaleDateString('he-IL', { year:'numeric', month:'long', day:'numeric' });
+    if (data.timestamp?.toDate) {
+      dateStr = data.timestamp.toDate().toLocaleDateString('he-IL', { year:'numeric', month:'long', day:'numeric' });
+    } else if (data.timestamp?.seconds) {
+      dateStr = new Date(data.timestamp.seconds*1000).toLocaleDateString('he-IL', { year:'numeric', month:'long', day:'numeric' });
+    }
 
     const lessonDiv = document.createElement('div');
     lessonDiv.className = 'lesson-card';
@@ -232,6 +282,7 @@ function renderLessons(lessons) {
   });
 }
 
+/* === פתיחת וידאו/סיכום בכרטיס === */
 container.addEventListener('click', (e) => {
   const id = e.target.dataset?.id;
   if (e.target.classList.contains('watch-btn')) {
@@ -245,6 +296,7 @@ container.addEventListener('click', (e) => {
   }
 });
 
+/* קליק על הכרטיס עצמו פותח וידאו */
 container.addEventListener('click', (e) => {
   if (e.target.closest('button')) return;
   const card = e.target.closest('.lesson-card');
@@ -254,26 +306,50 @@ container.addEventListener('click', (e) => {
   if (videoID) { modalVideo.src = `https://www.youtube.com/embed/${videoID}`; modal.classList.add('show'); modal.setAttribute('aria-hidden', 'false'); }
 });
 
+/* === החלק החשוב: סינון + חיפוש חכם === */
 function filterAndSortLessons() {
-  const searchTerm = normalizeText(searchInput.value);
+  const rawSearch = searchInput.value || "";
+  const searchTerm = normalizeHebrewBasic(rawSearch);
   const category = categorySelect.value;
 
-  let filtered = allLessons.filter(l => {
-    const matchesSearch = normalizeText(l.title).includes(searchTerm) || normalizeText(l.rabbi).includes(searchTerm);
-    const matchesCategory = category ? l.category === category : true;
-    return matchesSearch && matchesCategory;
-  });
+  let list;
 
-  filtered.sort((a,b)=> (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+  // אם יש טקסט חיפוש – משתמשים ב-Fuse
+  if (searchTerm.length >= 1 && fuse) {
+    list = fuse.search(searchTerm).map(r => r.item);
+  } else {
+    // בלי חיפוש – כל השיעורים, ממוינים לפי תאריך חדש->ישן
+    list = [...allLessons].sort((a,b)=> (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
+  }
 
-  renderLessons(filtered);
+  // סינון לפי קטגוריה (אם נבחרה)
+  if (category) {
+    list = list.filter(l => (l.category || "") === category);
+  }
+
+  // אם חיפשנו – כבר קיבלנו דירוג רלוונטיות. נשמור עליו,
+  // אבל נעדיף תאריך כשיש שוויון גס.
+  if (searchTerm.length >= 1) {
+    list = list.map((item, idx) => ({ item, idx }))
+      .sort((a, b) => {
+        // קודם כל: אם לשניהם יש תאריך – חדש קודם
+        const ta = a.item.timestamp?.seconds || 0;
+        const tb = b.item.timestamp?.seconds || 0;
+        if (tb !== ta) return tb - ta;
+        // אחרת – סדר החיפוש המקורי
+        return a.idx - b.idx;
+      })
+      .map(x => x.item);
+  }
+
+  renderLessons(list);
 }
 
-const searchInput = document.getElementById('search');
-const categorySelect = document.getElementById('category-select');
+/* האזנה לשינויים בשדות החיפוש/קטגוריה */
 searchInput.addEventListener('input', filterAndSortLessons);
 categorySelect.addEventListener('change', filterAndSortLessons);
 
+/* מודאלים – סגירה */
 closeModal.addEventListener('click', () => { modalVideo.src=''; modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); });
 closeSummaryModal.addEventListener('click', () => { summaryModal.classList.remove('show'); summaryModal.setAttribute('aria-hidden','true'); });
 modal.addEventListener('click', (e)=>{ if(e.target===modal){ modalVideo.src=''; modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }});
@@ -297,6 +373,58 @@ summaryModal.addEventListener('click', (e)=>{ if(e.target===summaryModal){ summa
 : cover;
   }
 </style>
+
+
+
+
+<!-- מודאל תמונה בעת כניסה -->
+<div id="entry-modal" class="entry-modal">
+  <img src="stop.png" alt="אזהרה" class="entry-modal-img">
+</div>
+
+<style>
+/* שכבת הרקע המטושש */
+.entry-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  backdrop-filter: blur(6px); /* טשטוש */
+  background: rgba(0, 0, 0, 0.5); /* כהות */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* תמונה קרובה לראש הדף */
+  padding-top: 40px;
+  z-index: 2000;
+}
+
+/* התמונה עצמה */
+.entry-modal-img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 8px;
+}
+
+/* אנימציית הופעה */
+.entry-modal {
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+</style>
+
+<script>
+// סגירת המודאל בלחיצה בכל מקום במסך
+document.getElementById("entry-modal").addEventListener("click", function() {
+  this.remove();
+});
+</script>
+
+
+
+
+
 
 </body>
 </html>
