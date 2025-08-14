@@ -8,6 +8,25 @@
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+
+<!-- Quill -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+
+<style>
+#summary-editor {
+  background: white;
+  min-height: 100px;
+}
+.lesson-item {
+  margin: 5px 0;
+  padding: 5px;
+  border: 1px solid #ccc;
+}
+button {
+  margin-left: 5px;
+}
+</style>
 </head>
 <body>
 
@@ -24,9 +43,8 @@
 
 <button id="logout-btn">התנתק</button>
 
-
 <div id="admin-section" style="display:none;">
-  <h2>הוסף שיעור חדש</h2>
+  <h2 id="form-title">הוסף שיעור חדש</h2>
   <input type="text" id="title" placeholder="שם השיעור"><br>
   <input type="text" id="rabbi" placeholder="שם הרב"><br>
   <input type="text" id="youtube" placeholder="קישור יוטיוב"><br>
@@ -36,6 +54,7 @@
     <option value="היסטוריה">היסטוריה</option>
     <option value="פרשת השבוע">פרשת השבוע</option>
   </select><br>
+  <div id="summary-editor"></div><br>
   <button id="add-lesson-btn">הוסף שיעור</button>
 
   <h2>שיעורים קיימים</h2>
@@ -61,6 +80,8 @@ const adminSection = document.getElementById('admin-section');
 const log = document.getElementById('log');
 let allLessons = [];
 
+const quillAdd = new Quill('#summary-editor', { theme: 'snow' });
+
 document.getElementById('login-btn').onclick = () => {
   const email = document.getElementById('email').value;
   const password = document.getElementById('password').value;
@@ -83,34 +104,62 @@ auth.onAuthStateChanged(user => {
   }
 });
 
+let editingId = null; // מזהה השיעור שנערך
+
 document.getElementById('add-lesson-btn').onclick = () => {
   const title = document.getElementById('title').value.trim();
   const rabbi = document.getElementById('rabbi').value.trim();
   const youtube = document.getElementById('youtube').value.trim();
   const category = document.getElementById('category').value;
+  const summary = quillAdd.root.innerHTML;
 
   if(!title || !rabbi || !youtube){
     log.innerHTML = "אנא מלא את כל השדות!";
     return;
   }
 
-  log.innerHTML = "מנסה להוסיף שיעור...";
-  db.collection("lessons").add({
-    title,
-    rabbi,
-    youtube,
-    category,
-    timestamp: firebase.firestore.FieldValue.serverTimestamp()
-  })
-  .then(docRef => {
-    log.innerHTML = "השיעור נוסף בהצלחה! (ID: " + docRef.id + ")";
-    document.getElementById('title').value = "";
-    document.getElementById('rabbi').value = "";
-    document.getElementById('youtube').value = "";
-    document.getElementById('category').value = "";
-  })
-  .catch(err => log.innerHTML = "שגיאה בהוספה: " + err.message);
+  if(editingId){
+    // מצב עריכה
+    db.collection("lessons").doc(editingId).update({
+      title,
+      rabbi,
+      youtube,
+      category,
+      summary
+    })
+    .then(() => {
+      log.innerHTML = "השיעור עודכן בהצלחה!";
+      resetForm();
+    })
+    .catch(err => log.innerHTML = "שגיאה בעדכון: " + err.message);
+  } else {
+    // מצב הוספה
+    db.collection("lessons").add({
+      title,
+      rabbi,
+      youtube,
+      category,
+      summary,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    })
+    .then(() => {
+      log.innerHTML = "השיעור נוסף בהצלחה!";
+      resetForm();
+    })
+    .catch(err => log.innerHTML = "שגיאה בהוספה: " + err.message);
+  }
 };
+
+function resetForm(){
+  editingId = null;
+  document.getElementById('title').value = "";
+  document.getElementById('rabbi').value = "";
+  document.getElementById('youtube').value = "";
+  document.getElementById('category').value = "";
+  quillAdd.root.innerHTML = "";
+  document.getElementById('form-title').innerText = "הוסף שיעור חדש";
+  document.getElementById('add-lesson-btn').innerText = "הוסף שיעור";
+}
 
 function loadLessons(){
   db.collection("lessons").orderBy("timestamp","desc").onSnapshot(snapshot => {
@@ -121,9 +170,9 @@ function loadLessons(){
       const data = doc.data();
       data.id = doc.id;
       allLessons.push(data);
+      let dateStr = data.timestamp ? new Date(data.timestamp.seconds*1000).toLocaleDateString('he-IL') : 'לא זמין';
       const div = document.createElement('div');
       div.className = 'lesson-item';
-      let dateStr = data.timestamp ? new Date(data.timestamp.seconds*1000).toLocaleDateString('he-IL') : 'לא זמין';
       div.innerHTML = `
         ${data.title} - ${data.rabbi} [${data.category || "לא סווג"}] - ${dateStr}
         <button onclick="editLesson('${doc.id}')">ערוך</button>
@@ -136,54 +185,32 @@ function loadLessons(){
 
 window.deleteLesson = function(id){
   db.collection("lessons").doc(id).delete()
-    .then(() => log.innerHTML = "השיעור נמחק בהצלחה! (ID: " + id + ")")
+    .then(() => log.innerHTML = "השיעור נמחק בהצלחה!")
     .catch(err => log.innerHTML = "שגיאה במחיקה: " + err.message);
 };
 
 window.editLesson = function(id){
   const lesson = allLessons.find(l => l.id === id);
   if(!lesson) return;
-
-  const newTitle = prompt("שם השיעור:", lesson.title);
-  if(newTitle === null) return;
-
-  const newRabbi = prompt("שם הרב:", lesson.rabbi);
-  if(newRabbi === null) return;
-
-  const newYoutube = prompt("קישור יוטיוב:", lesson.youtube);
-  if(newYoutube === null) return;
-
-  const newCategory = prompt("קטגוריה:", lesson.category || "");
-  if(newCategory === null) return;
-
-  db.collection("lessons").doc(id).update({
-    title: newTitle,
-    rabbi: newRabbi,
-    youtube: newYoutube,
-    category: newCategory
-  })
-  .then(() => log.innerHTML = "השיעור עודכן בהצלחה!")
-  .catch(err => log.innerHTML = "שגיאה בעדכון: " + err.message);
+  editingId = id;
+  document.getElementById('title').value = lesson.title;
+  document.getElementById('rabbi').value = lesson.rabbi;
+  document.getElementById('youtube').value = lesson.youtube;
+  document.getElementById('category').value = lesson.category || "";
+  quillAdd.root.innerHTML = lesson.summary || "";
+  document.getElementById('form-title').innerText = "עריכת שיעור";
+  document.getElementById('add-lesson-btn').innerText = "שמור שינויים";
 };
+
+document.getElementById('logout-btn').addEventListener('click', () => {
+  firebase.auth().signOut()
+    .then(() => window.location.href = 'admin.html')
+    .catch((error) => {
+      console.error("שגיאה בהתנתקות:", error);
+      alert("אירעה שגיאה בעת ההתנתקות. נסה שוב.");
+    });
+});
 </script>
-
-
-<script>
-  const logoutBtn = document.getElementById('logout-btn');
-
-  logoutBtn.addEventListener('click', () => {
-    firebase.auth().signOut()
-      .then(() => {
-        // משתמש יצא בהצלחה, מחזירים לדף הכניסה
-        window.location.href = 'admin.html'; // שנה לכתובת של מסך הכניסה שלך
-      })
-      .catch((error) => {
-        console.error("שגיאה בהתנתקות:", error);
-        alert("אירעה שגיאה בעת ההתנתקות. נסה שוב.");
-      });
-  });
-</script>
-
 
 </body>
 </html>
