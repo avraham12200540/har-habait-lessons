@@ -9,9 +9,9 @@ body {
 }
 
 header {
-  background: #4a90e2;
+ background: #A0522D;
   color: white;
-  padding: 15px;
+  padding: 3px;
   text-align: center;
   position: sticky;
   top: 0;
@@ -41,13 +41,18 @@ input, button, select, textarea {
   font-size: 1em;
 }
 
-button {
-  background: #4a90e2;
+.watch-btn {
+  background: #CD853F; /* צבע רגיל */
   color: white;
   border: none;
   cursor: pointer;
+  padding: 10px 20px;
 }
-button:hover { background: #357abd; }
+
+.watch-btn:hover {
+  background: #D9A066; /* צבע בהיר יותר במעבר עכבר */
+}
+
 
 /* כרטיס שיעור */
 #lessons-container {
