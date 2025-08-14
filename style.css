@@ -52,6 +52,21 @@ input, button, select, textarea {
 .watch-btn:hover {
   background: #D9A066; /* צבע בהיר יותר במעבר עכבר */
 }
+.summary-btn {
+  background: #03344c !important; /* צבע רגיל */
+  color: white !important;
+  border: none !important;
+  cursor: pointer;
+  padding: 10px 20px;
+  border-radius: 6px;
+  transition: background 0.3s ease;
+}
+
+.summary-btn:hover {
+  background: #04476a !important; /* צבע בהיר יותר במעבר עכבר */
+}
+
+
 
 
 /* כרטיס שיעור */
