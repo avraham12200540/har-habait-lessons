@@ -309,5 +309,55 @@ summaryModal.addEventListener('click', (e)=>{ if(e.target===summaryModal){ summa
 footer { position: relative; background: #CD853F; color: white; text-align: center; padding: 3px; }
 </style>
 
+
+
+<!-- מודאל תמונה בעת כניסה -->
+<div id="entry-modal" class="entry-modal">
+  <img src="stop.png" alt="אזהרה" class="entry-modal-img">
+</div>
+
+<style>
+/* שכבת הרקע המטושש */
+.entry-modal {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  backdrop-filter: blur(6px); /* טשטוש */
+  background: rgba(0, 0, 0, 0.5); /* כהות */
+  display: flex;
+  justify-content: center;
+  align-items: flex-start; /* תמונה קרובה לראש הדף */
+  padding-top: 40px;
+  z-index: 2000;
+}
+
+/* התמונה עצמה */
+.entry-modal-img {
+  max-width: 90%;
+  max-height: 90%;
+  border-radius: 8px;
+}
+
+/* אנימציית הופעה */
+.entry-modal {
+  animation: fadeIn 0.3s ease-out;
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+</style>
+
+<script>
+// סגירת המודאל בלחיצה בכל מקום במסך
+document.getElementById("entry-modal").addEventListener("click", function() {
+  this.remove();
+});
+</script>
+
+
+
+
 </body>
 </html>
+
