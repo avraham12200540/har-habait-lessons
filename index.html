@@ -116,48 +116,59 @@
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 
   <img src="logo.png" alt="לוגו האתר" class="site-logo">
-  <div class="header-center">
-    <h1>מרכז שיעורי הר הבית</h1>
-    <div class="search-container">
-      <input type="text" id="search" placeholder="חפש לפי נושא, שם שיעור או שם הרב...">
+
+  <div class="header-center-wrapper">
+    <div class="header-center">
+      <h1>מרכז שיעורי הר הבית</h1>
+      <div class="search-container">
+        <input type="text" id="search" placeholder="חפש לפי נושא, שם שיעור או שם הרב...">
+        <span class="search-underline"></span>
+      </div>
     </div>
   </div>
+
   <a href="admin.html" class="admin-link">כניסת מנהל</a>
 </header>
 
 <style>
-/* הגדרות header מותאמות */
-header { 
-  position: sticky; 
-  background: #CD853F; 
-  color: white; 
-  display: flex; 
-  align-items: center; 
-  justify-content: space-between; 
-  padding: 5px 20px; 
-  box-sizing: border-box; 
+/* הגדרות Header */
+header {
+  position: sticky;
+  top: 0;
+  background: #CD853F;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 5px 20px;
+  box-sizing: border-box;
+  z-index: 1000;
 }
 
-.site-logo { 
-  height: 90px; 
-  width: auto; 
+.site-logo {
+  height: 90px;
+  width: auto;
 }
 
-.header-center {
+.header-center-wrapper {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
   display: flex;
   flex-direction: column;
   align-items: center;
   gap: 10px;
 }
 
-.header-center h1 { 
-  font-family: 'Great Vibes', cursive; 
-  font-size: 60px; 
-  margin: 0; 
+.header-center h1 {
+  font-family: 'Great Vibes', cursive;
+  font-size: 60px;
+  margin: 0;
   text-align: center;
 }
 
 .search-container {
+  position: relative;
   width: 100%;
   max-width: 600px;
 }
@@ -168,87 +179,63 @@ header {
   font-size: 18px;
   padding: 0 10px;
   box-sizing: border-box;
+  border: 2px solid #fff;
+  border-radius: 8px;
+  outline: none;
+  transition: all 0.3s ease;
 }
 
-.admin-link { 
-  color: white; 
-  text-decoration: none; 
+.search-container input:focus,
+.search-container input:hover {
+  transform: scale(1.03);
+  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+  border-color: #FFD700;
 }
 
-/* התאמות למובייל */
-@media (max-width: 1200px) { 
-  .header-center h1 { font-size: 60px; } 
+/* קו פנימי זורם */
+.search-underline {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, #FFD700, #fff);
+  transition: width 0.5s ease;
+  border-radius: 2px;
 }
 
-@media (max-width: 800px) { 
-  .header-center h1 { font-size: 40px; } 
+.search-container input:focus + .search-underline,
+.search-container input:hover + .search-underline {
+  width: 100%;
 }
 
+.admin-link {
+  color: white;
+  text-decoration: none;
+}
+
+/* רספונסיביות */
 @media (max-width: 768px) {
   header {
     flex-direction: column;
-    padding: 10px;
-    gap: 10px;
     align-items: center;
+    gap: 10px;
+    position: relative;
   }
-  
-  .site-logo {
-    height: 60px;
-  }
-  
-  .header-center h1 {
-    font-size: 32px;
-  }
-  
-  .search-container input {
-    height: 45px;
-    font-size: 16px;
-  }
+
+  .site-logo { height: 60px; }
+  .header-center h1 { font-size: 32px; }
+  .search-container input { height: 45px; font-size: 16px; }
 }
 
 @media (max-width: 480px) {
   .header-center h1 { font-size: 28px; }
   .site-logo { height: 50px; }
-  .search-container input {
-    height: 40px;
-    font-size: 14px;
-  }
+  .search-container input { height: 40px; font-size: 14px; }
 }
 </style>
 
-
-<div class="search-background">
-  <div class="search-container">
-    <input type="text" id="search" placeholder="חפש לפי נושא, שם שיעור או שם הרב...">
-  </div>
-</div>
-
-<style>
-/* הגדרות חיפוש */
-.search-background { 
-  background-color: #CD853F; 
-  display: flex;                  /* מאפשר מרכוז */
-  justify-content: center;        /* מרכז אופקית */
-  align-items: center;            /* מרכז אנכית (אם יש גובה) */
-  padding: 6px 0;                 /* רווח אנכי קטן */
-  width: 100%; 
-  top: 20px; 
-  z-index: 100; 
-}
-
-.search-container { 
-  width: 100%; 
-  max-width: 600px; 
-}
-
-.search-container input { 
-  width: 100%; 
-  height: 40px; 
-  font-size: 18px; 
-  padding: 0 10px; 
-  box-sizing: border-box; 
-}
-</style>
 
 <div style="display:flex; gap:10px; margin-bottom:20px; padding:0 10px; padding-top: 5px;">
   <select id="category-select">
@@ -614,5 +601,6 @@ document.getElementById("entry-modal").addEventListener("click", function() {
 
 </body>
 </html>
+
 
 
