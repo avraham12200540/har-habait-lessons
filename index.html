@@ -115,34 +115,37 @@
 <header>
   <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 
-  <img src="logo.png" alt="לוגו האתר" class="site-logo">
-
-  <div class="header-center-wrapper">
-    <div class="header-center">
-      <h1>מרכז שיעורי הר הבית</h1>
-      <div class="search-container">
-        <input type="text" id="search" placeholder="חפש לפי נושא, שם שיעור או שם הרב...">
-        <span class="search-underline"></span>
-      </div>
-    </div>
+  <div class="top-header">
+    <img src="logo.png" alt="לוגו האתר" class="site-logo">
+    <h1>מרכז שיעורי הר הבית</h1>
+    <a href="admin.html" class="admin-link">כניסת מנהל</a>
   </div>
 
-  <a href="admin.html" class="admin-link">כניסת מנהל</a>
+  <div class="search-background">
+    <div class="search-container">
+      <input type="text" id="search" placeholder="חפש לפי נושא, שם שיעור או שם הרב...">
+      <span class="search-underline"></span>
+    </div>
+  </div>
 </header>
 
 <style>
-/* הגדרות Header */
+/* ================= Header ================= */
 header {
+  width: 100%;
   position: sticky;
   top: 0;
-  background: #CD853F;
-  color: white;
+  z-index: 1000;
+}
+
+/* כותרת + לוגו */
+.top-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 5px 20px;
+  background: #CD853F;
+  padding: 10px 20px; /* מוסיף מרווח עליון */
   box-sizing: border-box;
-  z-index: 1000;
 }
 
 .site-logo {
@@ -150,27 +153,32 @@ header {
   width: auto;
 }
 
-.header-center-wrapper {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 10px;
-}
-
-.header-center h1 {
+.top-header h1 {
   font-family: 'Great Vibes', cursive;
   font-size: 60px;
   margin: 0;
   text-align: center;
 }
 
+.admin-link {
+  color: white;
+  text-decoration: none;
+}
+
+/* ================= חיפוש ================= */
+.search-background {
+  background: #CD853F; /* צבע רקע מלא */
+  width: 100%;
+  padding: 10px 0; 
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
+}
+
 .search-container {
-  position: relative;
   width: 100%;
   max-width: 600px;
+  position: relative;
 }
 
 .search-container input {
@@ -210,27 +218,21 @@ header {
   width: 100%;
 }
 
-.admin-link {
-  color: white;
-  text-decoration: none;
-}
-
-/* רספונסיביות */
+/* ================= רספונסיביות ================= */
 @media (max-width: 768px) {
-  header {
+  .top-header {
     flex-direction: column;
     align-items: center;
     gap: 10px;
-    position: relative;
   }
 
   .site-logo { height: 60px; }
-  .header-center h1 { font-size: 32px; }
+  .top-header h1 { font-size: 32px; }
   .search-container input { height: 45px; font-size: 16px; }
 }
 
 @media (max-width: 480px) {
-  .header-center h1 { font-size: 28px; }
+  .top-header h1 { font-size: 28px; }
   .site-logo { height: 50px; }
   .search-container input { height: 40px; font-size: 14px; }
 }
@@ -601,6 +603,7 @@ document.getElementById("entry-modal").addEventListener("click", function() {
 
 </body>
 </html>
+
 
 
 
