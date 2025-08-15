@@ -21,6 +21,62 @@
 button { margin-left: 5px; }
 table { margin-top: 20px; border-collapse: collapse; width: 100%; }
 th, td { border: 1px solid #ccc; padding: 5px; text-align: center; }
+
+/* התאמות למובייל */
+@media (max-width: 768px) {
+  h1 {
+    font-size: 24px;
+    text-align: center;
+  }
+  
+  h2 {
+    font-size: 20px;
+  }
+  
+  input, button, select, textarea {
+    font-size: 16px;
+    max-width: 100%;
+  }
+  
+  .lesson-item {
+    padding: 8px;
+    margin: 8px 0;
+  }
+  
+  table {
+    font-size: 12px;
+  }
+  
+  th, td {
+    padding: 4px;
+  }
+  
+  #summary-editor {
+    min-height: 80px;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 20px;
+  }
+  
+  h2 {
+    font-size: 18px;
+  }
+  
+  .lesson-item {
+    font-size: 14px;
+  }
+  
+  table {
+    font-size: 11px;
+  }
+  
+  th, td {
+    padding: 3px;
+  }
+}
 </style>
 </head>
 <body>

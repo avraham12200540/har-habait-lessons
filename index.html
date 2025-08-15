@@ -153,6 +153,122 @@ h1 {
     padding-left: 100px; 
   } 
 }
+
+/* התאמות למובייל */
+@media (max-width: 768px) {
+  header {
+    flex-direction: column;
+    padding: 10px;
+    gap: 10px;
+  }
+  
+  .site-logo {
+    height: 60px;
+  }
+  
+  h1 {
+    font-size: 32px;
+    padding-left: 0;
+    text-align: center;
+  }
+  
+  .search-background {
+    padding: 10px;
+    padding-right: 10px;
+  }
+  
+  .search-container input {
+    height: 45px;
+    font-size: 16px;
+  }
+  
+  #lessons-container {
+    grid-template-columns: 1fr;
+    gap: 15px;
+    padding: 10px;
+  }
+  
+  .lesson-card {
+    margin: 0;
+  }
+  
+  .lesson-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  .watch-btn, .summary-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+  }
+  
+  .modal-content {
+    margin: 10px;
+    padding: 15px;
+    max-width: 95%;
+    max-height: 85vh;
+  }
+  
+  #modal-video {
+    height: 250px;
+  }
+  
+  .modal-content--summary {
+    max-height: 70vh;
+  }
+  
+  .entry-modal-img {
+    max-width: 95%;
+    max-height: 80vh;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 28px;
+  }
+  
+  .site-logo {
+    height: 50px;
+  }
+  
+  .search-container input {
+    height: 40px;
+    font-size: 14px;
+  }
+  
+  #lessons-container {
+    padding: 8px;
+  }
+  
+  .lesson-card {
+    padding: 8px;
+  }
+  
+  .lesson-card img {
+    height: 120px;
+  }
+  
+  .lesson-card h3 {
+    font-size: 1em;
+  }
+  
+  .modal-content {
+    margin: 5px;
+    padding: 10px;
+  }
+  
+  #modal-video {
+    height: 200px;
+  }
+  
+  .modal-close {
+    font-size: 1.5rem;
+    top: 5px;
+    right: 5px;
+  }
+}
 </style>
 
 <div class="search-background">
