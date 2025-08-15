@@ -113,10 +113,15 @@
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 
 <header>
-<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 
   <img src="logo.png" alt="לוגו האתר" class="site-logo">
-  <h1>מרכז שיעורי הר הבית</h1>
+  <div class="header-center">
+    <h1>מרכז שיעורי הר הבית</h1>
+    <div class="search-container">
+      <input type="text" id="search" placeholder="חפש לפי נושא, שם שיעור או שם הרב...">
+    </div>
+  </div>
   <a href="admin.html" class="admin-link">כניסת מנהל</a>
 </header>
 
@@ -132,144 +137,85 @@ header {
   padding: 5px 20px; 
   box-sizing: border-box; 
 }
-.site-logo { height: 90px; width: auto; }
-h1 { 
+
+.site-logo { 
+  height: 90px; 
+  width: auto; 
+}
+
+.header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.header-center h1 { 
   font-family: 'Great Vibes', cursive; 
   font-size: 60px; 
   margin: 0; 
-  padding-left: 511px; 
-  white-space: nowrap; 
+  text-align: center;
 }
-.admin-link { color: white; text-decoration: none; }
-@media (max-width: 1200px) { 
-  h1 { 
-    font-size: 60px; 
-    padding-left: 300px; 
-  } 
+
+.search-container {
+  width: 100%;
+  max-width: 600px;
 }
-@media (max-width: 800px) { 
-  h1 { 
-    font-size: 40px; 
-    padding-left: 100px; 
-  } 
+
+.search-container input {
+  width: 100%;
+  height: 40px;
+  font-size: 18px;
+  padding: 0 10px;
+  box-sizing: border-box;
+}
+
+.admin-link { 
+  color: white; 
+  text-decoration: none; 
 }
 
 /* התאמות למובייל */
+@media (max-width: 1200px) { 
+  .header-center h1 { font-size: 60px; } 
+}
+
+@media (max-width: 800px) { 
+  .header-center h1 { font-size: 40px; } 
+}
+
 @media (max-width: 768px) {
   header {
     flex-direction: column;
     padding: 10px;
     gap: 10px;
+    align-items: center;
   }
   
   .site-logo {
     height: 60px;
   }
   
-  h1 {
+  .header-center h1 {
     font-size: 32px;
-    padding-left: 0;
-    text-align: center;
-  }
-  
-  .search-background {
-    padding: 10px;
-    padding-right: 10px;
   }
   
   .search-container input {
     height: 45px;
     font-size: 16px;
   }
-  
-  #lessons-container {
-    grid-template-columns: 1fr;
-    gap: 15px;
-    padding: 10px;
-  }
-  
-  .lesson-card {
-    margin: 0;
-  }
-  
-  .lesson-actions {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .watch-btn, .summary-btn {
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-  }
-  
-  .modal-content {
-    margin: 10px;
-    padding: 15px;
-    max-width: 95%;
-    max-height: 85vh;
-  }
-  
-  #modal-video {
-    height: 250px;
-  }
-  
-  .modal-content--summary {
-    max-height: 70vh;
-  }
-  
-  .entry-modal-img {
-    max-width: 95%;
-    max-height: 80vh;
-  }
 }
 
 @media (max-width: 480px) {
-  h1 {
-    font-size: 28px;
-  }
-  
-  .site-logo {
-    height: 50px;
-  }
-  
+  .header-center h1 { font-size: 28px; }
+  .site-logo { height: 50px; }
   .search-container input {
     height: 40px;
     font-size: 14px;
   }
-  
-  #lessons-container {
-    padding: 8px;
-  }
-  
-  .lesson-card {
-    padding: 8px;
-  }
-  
-  .lesson-card img {
-    height: 120px;
-  }
-  
-  .lesson-card h3 {
-    font-size: 1em;
-  }
-  
-  .modal-content {
-    margin: 5px;
-    padding: 10px;
-  }
-  
-  #modal-video {
-    height: 200px;
-  }
-  
-  .modal-close {
-    font-size: 1.5rem;
-    top: 5px;
-    right: 5px;
-  }
 }
 </style>
+
 
 <div class="search-background">
   <div class="search-container">
@@ -668,4 +614,5 @@ document.getElementById("entry-modal").addEventListener("click", function() {
 
 </body>
 </html>
+
 
