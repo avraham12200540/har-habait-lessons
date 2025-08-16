@@ -9,7 +9,6 @@ body {
 }
 
 header {
- background: #A0522D;
   color: white;
   padding: 3px;
   text-align: center;
@@ -214,3 +213,4 @@ input, button, select, textarea {
     font-size: 0.8em;
   }
 }
+
