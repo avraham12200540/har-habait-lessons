@@ -8,15 +8,7 @@ body {
   margin: 0;
 }
 
-/* ננקה את ההגדרה הישנה ל-header כדי לא להתנגש */
-header {
-  border: none;
-  background: transparent;
-  padding: 0;
-  margin: 0;
-}
-
-/* קישורים */
+/* כפתורים וקישורים */
 .back-link,
 .admin-link {
   position: absolute;
@@ -30,101 +22,6 @@ header {
   font-size: 0.95em;
 }
 
-/* ================= כותרת + חיפוש ================= */
-.top-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: sticky;   /* הכותרת מרחפת */
-  top: 0;
-  z-index: 1000;
-  background: #CD853F; /* חום */
-  padding: 10px 20px;
-  box-sizing: border-box;
-}
-
-.site-logo {
-  height: 90px;
-  width: auto;
-}
-
-.top-header h1 {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: 'Great Vibes', cursive;
-  font-size: 60px;
-  margin: 0;
-  text-align: center;
-}
-
-.admin-link { 
-  color: white;
-  text-decoration: none;
-}
-
-.search-background {
-  background: #CD853F; /* חום מאחורי החיפוש */
-  width: 100%;
-  padding: 5px 0;
-  display: flex;
-  justify-content: center;
-  box-sizing: border-box;
-}
-
-.search-container {
-  width: 100%;
-  max-width: 600px;
-  position: relative;
-}
-
-.search-container input {
-  width: 100%;
-  height: 40px;
-  font-size: 18px;
-  padding: 0 10px;
-  box-sizing: border-box;
-  border: 2px solid #fff;
-  border-radius: 8px;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
-.search-container input:focus,
-.search-container input:hover {
-  transform: scale(1.03);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-  border-color: #FFD700;
-}
-
-.search-underline {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  width: 0%;
-  background: linear-gradient(90deg, #FFD700, #fff);
-  transition: width 0.5s ease;
-  border-radius: 2px;
-}
-
-.search-container input:focus + .search-underline,
-.search-container input:hover + .search-underline {
-  width: 100%;
-}
-
-/* ================= כפתורים ================= */
-input, button, select, textarea {
-  margin: 5px;
-  padding: 8px 10px;
-  width: 100%;
-  max-width: 400px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
-  font-size: 1em;
-}
-
 .watch-btn {
   background: #CD853F;
   color: white;
@@ -133,9 +30,7 @@ input, button, select, textarea {
   padding: 10px 20px;
 }
 
-.watch-btn:hover {
-  background: #D9A066;
-}
+.watch-btn:hover { background: #D9A066; }
 
 .summary-btn {
   background: #03344c !important;
@@ -147,18 +42,15 @@ input, button, select, textarea {
   transition: background 0.3s ease;
 }
 
-.summary-btn:hover {
-  background: #04476a !important;
-}
+.summary-btn:hover { background: #04476a !important; }
 
-/* ================= כרטיסי שיעור ================= */
+/* כרטיס שיעור */
 #lessons-container {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
   gap: 15px;
   padding: 10px;
 }
-
 .lesson-card {
   background: white;
   padding: 10px;
@@ -182,7 +74,7 @@ input, button, select, textarea {
   font-size: 1.05em;
 }
 
-/* ================= מודאל ================= */
+/* מודאל כללי */
 .modal {
   display: none;
   position: fixed;
@@ -196,10 +88,7 @@ input, button, select, textarea {
   transition: opacity 0.25s ease;
   cursor: pointer;
 }
-.modal.show { 
-  display: flex; 
-  opacity: 1; 
-}
+.modal.show { display: flex; opacity: 1; }
 
 .modal-content {
   position: relative;
@@ -229,7 +118,7 @@ input, button, select, textarea {
 }
 .modal-close:hover { color: #000; }
 
-/* ================= מנהל ================= */
+/* רשימת שיעורים במנהל */
 .lesson-item {
   background: #fff;
   margin: 8px 10px;
@@ -246,32 +135,26 @@ input, button, select, textarea {
 .lesson-item__meta { font-size: 0.95em; }
 .lesson-item__actions button { width: auto; }
 
-/* ================= רספונסיביות ================= */
+/* התאמות למסכים נמוכים */
+@media (max-height: 700px) {
+  .modal-content { height: 80vh; }
+  #modal-video { height: calc(80vh - 50px); }
+}
+
 @media (max-width: 768px) {
   body { font-size: 14px; }
   
-  input, button, select, textarea {
-    font-size: 16px;
-    max-width: 100%;
-  }
+  input, button, select, textarea { font-size: 16px; max-width: 100%; }
   
   .lesson-card { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
   .lesson-card:hover { transform: none; }
   
   .lesson-meta p { margin: 5px 0; font-size: 0.9em; }
   .views-count { font-size: 0.85em; margin-top: 8px; }
-
-  .site-logo { height: 60px; }
-  .top-header h1 { font-size: 32px; position: static; transform: none; }
-  .search-container input { height: 45px; font-size: 16px; }
 }
 
 @media (max-width: 480px) {
   body { font-size: 13px; }
   .lesson-meta p { font-size: 0.85em; }
   .views-count { font-size: 0.8em; }
-
-  .top-header h1 { font-size: 28px; }
-  .site-logo { height: 50px; }
-  .search-container input { height: 40px; font-size: 14px; }
 }
