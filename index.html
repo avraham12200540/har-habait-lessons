@@ -133,8 +133,9 @@
 /* ================= Header ================= */
 header {
   width: 100%;
-  border: none;
-  box-shadow: none;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 /* כותרת + לוגו */
@@ -142,13 +143,9 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  position: sticky;   /* הכותרת מרחפת */
-  top: 0;
-  z-index: 1000;      /* לוודא שתמיד מעל */
-  background: #CD853F; /* חום */
-  padding: 10px 20px;
+  background: #CD853F;
+  padding: 10px 20px; /* מוסיף מרווח עליון */
   box-sizing: border-box;
-  color: white;         /* צבע הטקסט לבן */
 }
 
 .site-logo {
@@ -157,9 +154,6 @@ header {
 }
 
 .top-header h1 {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
   font-family: 'Great Vibes', cursive;
   font-size: 60px;
   margin: 0;
@@ -172,14 +166,15 @@ header {
 }
 
 /* ================= חיפוש ================= */
-
 .search-background {
-  margin: 0;
-  padding: 5px 0 10px 0; /* אפשר להגדיל padding למטה אם צריך */
-  background: #CD853F;
+  background: #CD853F; /* צבע רקע מלא */
+  width: 100%;
+  padding: 10px 0; 
+  display: flex;
+  justify-content: center;
+  box-sizing: border-box;
 }
 
-	
 .search-container {
   width: 100%;
   max-width: 600px;
@@ -192,7 +187,7 @@ header {
   font-size: 18px;
   padding: 0 10px;
   box-sizing: border-box;
-  border: 2px solid #fff; /* שולי לבן */
+  border: 2px solid #fff;
   border-radius: 8px;
   outline: none;
   transition: all 0.3s ease;
@@ -205,6 +200,7 @@ header {
   border-color: #FFD700;
 }
 
+/* קו פנימי זורם */
 .search-underline {
   content: '';
   position: absolute;
@@ -231,7 +227,7 @@ header {
   }
 
   .site-logo { height: 60px; }
-  .top-header h1 { font-size: 32px; position: static; transform: none; }
+  .top-header h1 { font-size: 32px; }
   .search-container input { height: 45px; font-size: 16px; }
 }
 
@@ -241,8 +237,6 @@ header {
   .search-container input { height: 40px; font-size: 14px; }
 }
 </style>
-
-
 
 
 <div style="display:flex; gap:10px; margin-bottom:20px; padding:0 10px; padding-top: 5px;">
@@ -609,14 +603,6 @@ document.getElementById("entry-modal").addEventListener("click", function() {
 
 </body>
 </html>
-
-
-
-
-
-
-
-
 
 
 
