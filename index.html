@@ -22,88 +22,23 @@
 
 
 <style>
-/* תמונת רקע */
 .background-image {
-  position: fixed; 
-  top: 0; 
-  left: 0; 
-  width: 100%; 
-  height: 100%;
+  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
   background: url('1.png') center center / cover no-repeat;
-  opacity: 0.3; 
-  z-index: -1;
+  opacity: 0.3; z-index: -1;
 }
-.modal-content--summary { 
-  max-height: 80vh; 
-  overflow:auto; 
-}
-.summary-btn { 
-  background:#ff9800; 
-  color:#fff; 
-  border:none; 
-  padding:6px 10px; 
-  border-radius:6px; 
-  cursor:pointer; 
-  font-size:0.9em; 
-  margin-top:6px; 
-}
-.lesson-actions { 
-  display:flex; 
-  gap:8px; 
-  flex-wrap:wrap; 
-  margin-top:6px; 
-}
-/* הגדרות modal מותאמות */
-.modal { 
-  display:none; 
-  position:fixed; 
-  top:0; 
-  left:0; 
-  width:100%; 
-  height:100%; 
-  background:rgba(0,0,0,0.5); 
-  justify-content:center; 
-  align-items:center; 
-  z-index:1000; 
-}
+.modal-content--summary { max-height: 80vh; overflow:auto; }
+.summary-btn { background:#ff9800; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-size:0.9em; margin-top:6px; }
+.lesson-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
+.modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000; }
 .modal.show { display:flex; }
-.modal-content { 
-  position:relative; 
-  background:#fff; 
-  padding:20px; 
-  max-width:90%; 
-  max-height:90%; 
-  overflow:auto; 
-  border-radius:8px; 
-}
-.modal-close { 
-  font-size:1.2rem; 
-  color:#555; 
-  background:transparent; 
-  border:none; 
-  cursor:pointer; 
-  position:absolute; 
-  top:8px; 
-  right:8px; 
-  line-height:1; 
-}
+.modal-content { position:relative; background:#fff; padding:20px; max-width:90%; max-height:90%; overflow:auto; border-radius:8px; }
+.modal-close { font-size:1.2rem; color:#555; background:transparent; border:none; cursor:pointer; position:absolute; top:8px; right:8px; line-height:1; }
 .modal-close:hover { color:#000; }
 
-/* הגדרות טבלה */
-#device-table { 
-  margin-top:20px; 
-  border-collapse: collapse; 
-  width: 100%; 
-}
-#device-table th, #device-table td { 
-  border: 1px solid #ccc; 
-  padding: 6px; 
-  text-align: left; 
-}
-#device-table th { 
-  background: #CD853F; 
-  color: white; 
-}
+#device-table { margin-top:20px; border-collapse: collapse; width: 100%; }
+#device-table th, #device-table td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+#device-table th { background: #CD853F; color: white; }
 </style>
 </head>
 <body>
@@ -113,131 +48,33 @@
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
 
 <header>
-  <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
 
-  <div class="top-header">
-    <img src="logo.png" alt="לוגו האתר" class="site-logo">
-    <h1>מרכז שיעורי הר הבית</h1>
-    <a href="admin.html" class="admin-link">כניסת מנהל</a>
-  </div>
-
-  <div class="search-background">
-    <div class="search-container">
-      <input type="text" id="search" placeholder="חפש לפי נושא, שם שיעור או שם הרב...">
-      <span class="search-underline"></span>
-    </div>
-  </div>
+  <img src="logo.png" alt="לוגו האתר" class="site-logo">
+  <h1>מרכז שיעורי הר הבית</h1>
+  <a href="admin.html" class="admin-link">כניסת מנהל</a>
 </header>
 
 <style>
-/* ================= Header ================= */
-header {
-  width: 100%;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
-}
-
-/* כותרת + לוגו */
-.top-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: #CD853F;
-  padding: 10px 20px; /* מוסיף מרווח עליון */
-  box-sizing: border-box;
-}
-
-.site-logo {
-  height: 90px;
-  width: auto;
-}
-
-.top-header h1 {
-  font-family: 'Great Vibes', cursive;
-  font-size: 60px;
-  margin: 0;
-  text-align: center;
-}
-
-.admin-link {
-  color: white;
-  text-decoration: none;
-}
-
-/* ================= חיפוש ================= */
-.search-background {
-  background: #CD853F; /* צבע רקע מלא */
-  width: 100%;
-  padding: 10px 0; 
-  display: flex;
-  justify-content: center;
-  box-sizing: border-box;
-}
-
-.search-container {
-  width: 100%;
-  max-width: 600px;
-  position: relative;
-}
-
-.search-container input {
-  width: 100%;
-  height: 40px;
-  font-size: 18px;
-  padding: 0 10px;
-  box-sizing: border-box;
-  border: 2px solid #fff;
-  border-radius: 8px;
-  outline: none;
-  transition: all 0.3s ease;
-}
-
-.search-container input:focus,
-.search-container input:hover {
-  transform: scale(1.03);
-  box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-  border-color: #FFD700;
-}
-
-/* קו פנימי זורם */
-.search-underline {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  width: 0%;
-  background: linear-gradient(90deg, #FFD700, #fff);
-  transition: width 0.5s ease;
-  border-radius: 2px;
-}
-
-.search-container input:focus + .search-underline,
-.search-container input:hover + .search-underline {
-  width: 100%;
-}
-
-/* ================= רספונסיביות ================= */
-@media (max-width: 768px) {
-  .top-header {
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-  }
-
-  .site-logo { height: 60px; }
-  .top-header h1 { font-size: 32px; }
-  .search-container input { height: 45px; font-size: 16px; }
-}
-
-@media (max-width: 480px) {
-  .top-header h1 { font-size: 28px; }
-  .site-logo { height: 50px; }
-  .search-container input { height: 40px; font-size: 14px; }
-}
+header { position: sticky; background: #CD853F; color: white; display: flex; align-items: center; justify-content: space-between; padding: 5px 20px; box-sizing: border-box; }
+.site-logo { height: 90px; width: auto; }
+h1 { font-family: 'Great Vibes', cursive; font-size: 60px; margin: 0; padding-left: 511px; white-space: nowrap; }
+.admin-link { color: white; text-decoration: none; }
+@media (max-width: 1200px) { h1 { font-size: 60px; padding-left: 300px; } }
+@media (max-width: 800px) { h1 { font-size: 40px; padding-left: 100px; } }
 </style>
 
+<div class="search-background">
+  <div class="search-container">
+    <input type="text" id="search" placeholder="חפש לפי נושא, שם שיעור או שם הרב...">
+  </div>
+</div>
+
+<style>
+.search-background { background-color: #CD853F; padding-top: 6px; padding-bottom: 6px; padding-left: 10px; padding-right: 550px; width: 100%; top: 20px; z-index: 100; }
+.search-container { width: 100%; max-width: 600px; }
+.search-container input { width: 100%; height: 40px; font-size: 18px; padding: 0 10px; box-sizing: border-box; }
+</style>
 
 <div style="display:flex; gap:10px; margin-bottom:20px; padding:0 10px; padding-top: 5px;">
   <select id="category-select">
@@ -299,8 +136,8 @@ const closeModal = document.getElementById('close-modal');
 const summaryModal = document.getElementById('summary-modal');
 const summaryContent = document.getElementById('summary-content');
 const closeSummaryModal = document.getElementById('close-summary-modal');
-// const adminDevicesDiv = document.getElementById('admin-devices');
-// const deviceTableBody = document.getElementById('device-table-body');
+const adminDevicesDiv = document.getElementById('admin-devices');
+const deviceTableBody = document.getElementById('device-table-body');
 
 /* === מזהה וסוג מכשיר === */
 function getDeviceId() {
@@ -342,26 +179,26 @@ incrementVisit();
 /* === בדיקה אם מנהל מחובר === */
 auth.onAuthStateChanged(user => {
   if(user && user.email === "glasser.avraham@gmail.com") {
-    // adminDevicesDiv.style.display = 'block';
-    // visitsDocRef.collection("devices").onSnapshot(snapshot => {
-    //   deviceTableBody.innerHTML = '';
-    //   if(snapshot.empty){
-    //     deviceTableBody.innerHTML = '<tr><td colspan="4">לא נמצאו נתונים</td></tr>';
-    //     return;
-    //   }
-    //   snapshot.forEach(doc => {
-    //     const data = doc.data();
-    //     const lastVisit = data.lastVisit?.toDate ? data.lastVisit.toDate().toLocaleString('he-IL') : '';
-    //     const tr = document.createElement('tr');
-    //     tr.innerHTML = `
-    //       <td>${doc.id}</td>
-    //       <td>${data.deviceType || ''}</td>
-    //       <td>${data.count || 0}</td>
-    //       <td>${lastVisit}</td>
-    //     `;
-    //     deviceTableBody.appendChild(tr);
-    //   });
-    // });
+    adminDevicesDiv.style.display = 'block';
+    visitsDocRef.collection("devices").onSnapshot(snapshot => {
+      deviceTableBody.innerHTML = '';
+      if(snapshot.empty){
+        deviceTableBody.innerHTML = '<tr><td colspan="4">לא נמצאו נתונים</td></tr>';
+        return;
+      }
+      snapshot.forEach(doc => {
+        const data = doc.data();
+        const lastVisit = data.lastVisit?.toDate ? data.lastVisit.toDate().toLocaleString('he-IL') : '';
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${doc.id}</td>
+          <td>${data.deviceType || ''}</td>
+          <td>${data.count || 0}</td>
+          <td>${lastVisit}</td>
+        `;
+        deviceTableBody.appendChild(tr);
+      });
+    });
   }
 });
 
@@ -543,14 +380,7 @@ summaryModal.addEventListener('click', (e)=>{ if(e.target===summaryModal){ summa
 </footer>
 
 <style>
-/* הגדרות footer */
-footer { 
-  position: relative; 
-  background: #CD853F; 
-  color: white; 
-  text-align: center; 
-  padding: 3px; 
-}
+footer { position: relative; background: #CD853F; color: white; text-align: center; padding: 3px; }
 </style>
 
 
@@ -575,7 +405,6 @@ footer {
   align-items: flex-start; /* תמונה קרובה לראש הדף */
   padding-top: 40px;
   z-index: 2000;
-  animation: fadeIn 0.3s ease-out;
 }
 
 /* התמונה עצמה */
@@ -586,6 +415,9 @@ footer {
 }
 
 /* אנימציית הופעה */
+.entry-modal {
+  animation: fadeIn 0.3s ease-out;
+}
 @keyframes fadeIn {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -603,6 +435,3 @@ document.getElementById("entry-modal").addEventListener("click", function() {
 
 </body>
 </html>
-
-
-
