@@ -133,11 +133,11 @@
 /* ================= Header ================= */
 header {
   width: 100%;
-  position: static;   /* כבר לא sticky */
+  position: static; 
   top: auto;
   z-index: auto;
-  border: none;       /* ביטול מסגרת */
-  box-shadow: none;   /* ליתר ביטחון שלא יהיה קו */
+  border: none;
+  box-shadow: none;
 }
 
 /* כותרת + לוגו */
@@ -146,7 +146,7 @@ header {
   align-items: center;
   justify-content: space-between;
   position: relative;
-  background: #CD853F;
+  background: #CD853F; /* רק לכותרת יש חום */
   padding: 10px 20px;
   box-sizing: border-box;
 }
@@ -173,9 +173,9 @@ header {
 
 /* ================= חיפוש ================= */
 .search-background {
-  background: #CD853F; 
+  background: transparent; /* ביטול חום בתיבת החיפוש */
   width: 100%;
-  padding: 5px 0;   /* פחות רווח */
+  padding: 5px 0; 
   display: flex;
   justify-content: center;
   box-sizing: border-box;
@@ -193,7 +193,7 @@ header {
   font-size: 18px;
   padding: 0 10px;
   box-sizing: border-box;
-  border: 2px solid #fff;
+  border: 2px solid #CD853F; /* שולי החיפוש בצבע חום להתאמה */
   border-radius: 8px;
   outline: none;
   transition: all 0.3s ease;
@@ -609,6 +609,7 @@ document.getElementById("entry-modal").addEventListener("click", function() {
 
 </body>
 </html>
+
 
 
 
