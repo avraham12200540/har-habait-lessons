@@ -8,7 +8,16 @@ body {
   margin: 0;
 }
 
-/* כפתורים וקישורים */
+header {
+ background: #A0522D;
+  color: white;
+  padding: 3px;
+  text-align: center;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
 .back-link,
 .admin-link {
   position: absolute;
@@ -22,18 +31,29 @@ body {
   font-size: 0.95em;
 }
 
+input, button, select, textarea {
+  margin: 5px;
+  padding: 8px 10px;
+  width: 100%;
+  max-width: 400px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 1em;
+}
+
 .watch-btn {
-  background: #CD853F;
+  background: #CD853F; /* צבע רגיל */
   color: white;
   border: none;
   cursor: pointer;
   padding: 10px 20px;
 }
 
-.watch-btn:hover { background: #D9A066; }
-
+.watch-btn:hover {
+  background: #D9A066; /* צבע בהיר יותר במעבר עכבר */
+}
 .summary-btn {
-  background: #03344c !important;
+  background: #03344c !important; /* צבע רגיל */
   color: white !important;
   border: none !important;
   cursor: pointer;
@@ -42,7 +62,12 @@ body {
   transition: background 0.3s ease;
 }
 
-.summary-btn:hover { background: #04476a !important; }
+.summary-btn:hover {
+  background: #04476a !important; /* צבע בהיר יותר במעבר עכבר */
+}
+
+
+
 
 /* כרטיס שיעור */
 #lessons-container {
@@ -86,9 +111,12 @@ body {
   z-index: 1000;
   opacity: 0;
   transition: opacity 0.25s ease;
-  cursor: pointer;
+  cursor: pointer; /* מאפשר ללחוץ מחוץ למודאל */
 }
-.modal.show { display: flex; opacity: 1; }
+.modal.show { 
+  display: flex; 
+  opacity: 1; 
+}
 
 .modal-content {
   position: relative;
@@ -98,10 +126,11 @@ body {
   border-radius: 12px;
   transform: scale(0.92);
   transition: transform 0.25s ease;
-  cursor: default;
+  cursor: default; /* כדי שהלחיצה על התוכן לא תסגור את המודאל */
 }
 .modal.show .modal-content { transform: scale(1); }
 
+/* סמל סגירה - צמוד, רק האיקס עצמו */
 .modal-close {
   position: absolute;
   top: 8px;
@@ -109,14 +138,15 @@ body {
   font-size: 1.5em;
   line-height: 1;
   cursor: pointer;
-  background: transparent;
+  background: transparent; /* ללא רקע */
   color: #555;
   border: none;
   padding: 0;
-  width: auto;
+  width: auto;  /* רק מקום התצוגה של האיקס */
   height: auto;
 }
 .modal-close:hover { color: #000; }
+
 
 /* רשימת שיעורים במנהל */
 .lesson-item {
@@ -141,20 +171,46 @@ body {
   #modal-video { height: calc(80vh - 50px); }
 }
 
+/* התאמות נוספות למובייל */
 @media (max-width: 768px) {
-  body { font-size: 14px; }
+  body {
+    font-size: 14px;
+  }
   
-  input, button, select, textarea { font-size: 16px; max-width: 100%; }
+  input, button, select, textarea {
+    font-size: 16px; /* מונע זום אוטומטי באייפון */
+    max-width: 100%;
+  }
   
-  .lesson-card { box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-  .lesson-card:hover { transform: none; }
+  .lesson-card {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
   
-  .lesson-meta p { margin: 5px 0; font-size: 0.9em; }
-  .views-count { font-size: 0.85em; margin-top: 8px; }
+  .lesson-card:hover {
+    transform: none; /* מבטל אפקט hover במובייל */
+  }
+  
+  .lesson-meta p {
+    margin: 5px 0;
+    font-size: 0.9em;
+  }
+  
+  .views-count {
+    font-size: 0.85em;
+    margin-top: 8px;
+  }
 }
 
 @media (max-width: 480px) {
-  body { font-size: 13px; }
-  .lesson-meta p { font-size: 0.85em; }
-  .views-count { font-size: 0.8em; }
+  body {
+    font-size: 13px;
+  }
+  
+  .lesson-meta p {
+    font-size: 0.85em;
+  }
+  
+  .views-count {
+    font-size: 0.8em;
+  }
 }
