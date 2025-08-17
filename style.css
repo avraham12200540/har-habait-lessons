@@ -1,6 +1,11 @@
 /* בסיס */
-* { box-sizing: border-box; }
-html, body { height: 100%; }
+* {
+  box-sizing: border-box;
+}
+html,
+body {
+  height: 100%;
+}
 body {
   font-family: Arial, sans-serif;
   background-color: #f7f9fc;
@@ -9,7 +14,7 @@ body {
 }
 
 header {
- background: #A0522D;
+  background: #a0522d;
   color: white;
   padding: 3px;
   text-align: center;
@@ -25,13 +30,16 @@ header {
   left: 16px;
   color: white;
   text-decoration: none;
-  background: rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.2);
   padding: 6px 10px;
   border-radius: 6px;
   font-size: 0.95em;
 }
 
-input, button, select, textarea {
+input,
+button,
+select,
+textarea {
   margin: 5px;
   padding: 8px 10px;
   width: 100%;
@@ -42,7 +50,7 @@ input, button, select, textarea {
 }
 
 .watch-btn {
-  background: #CD853F; /* צבע רגיל */
+  background: #cd853f; /* צבע רגיל */
   color: white;
   border: none;
   cursor: pointer;
@@ -50,7 +58,7 @@ input, button, select, textarea {
 }
 
 .watch-btn:hover {
-  background: #D9A066; /* צבע בהיר יותר במעבר עכבר */
+  background: #d9a066; /* צבע בהיר יותר במעבר עכבר */
 }
 .summary-btn {
   background: #03344c !important; /* צבע רגיל */
@@ -66,9 +74,6 @@ input, button, select, textarea {
   background: #04476a !important; /* צבע בהיר יותר במעבר עכבר */
 }
 
-
-
-
 /* כרטיס שיעור */
 #lessons-container {
   display: grid;
@@ -80,13 +85,15 @@ input, button, select, textarea {
   background: white;
   padding: 10px;
   border-radius: 10px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
   display: grid;
   grid-template-rows: auto 1fr;
   cursor: pointer;
   transition: transform 0.1s;
 }
-.lesson-card:hover { transform: scale(1.02); }
+.lesson-card:hover {
+  transform: scale(1.02);
+}
 .lesson-card img {
   width: 100%;
   height: 150px;
@@ -104,7 +111,7 @@ input, button, select, textarea {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.7);
+  background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(5px);
   justify-content: center;
   align-items: center;
@@ -113,9 +120,9 @@ input, button, select, textarea {
   transition: opacity 0.25s ease;
   cursor: pointer; /* מאפשר ללחוץ מחוץ למודאל */
 }
-.modal.show { 
-  display: flex; 
-  opacity: 1; 
+.modal.show {
+  display: flex;
+  opacity: 1;
 }
 
 .modal-content {
@@ -128,7 +135,9 @@ input, button, select, textarea {
   transition: transform 0.25s ease;
   cursor: default; /* כדי שהלחיצה על התוכן לא תסגור את המודאל */
 }
-.modal.show .modal-content { transform: scale(1); }
+.modal.show .modal-content {
+  transform: scale(1);
+}
 
 /* סמל סגירה - צמוד, רק האיקס עצמו */
 .modal-close {
@@ -142,11 +151,12 @@ input, button, select, textarea {
   color: #555;
   border: none;
   padding: 0;
-  width: auto;  /* רק מקום התצוגה של האיקס */
+  width: auto; /* רק מקום התצוגה של האיקס */
   height: auto;
 }
-.modal-close:hover { color: #000; }
-
+.modal-close:hover {
+  color: #000;
+}
 
 /* רשימת שיעורים במנהל */
 .lesson-item {
@@ -154,7 +164,7 @@ input, button, select, textarea {
   margin: 8px 10px;
   padding: 10px;
   border-radius: 8px;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
 }
 .lesson-item__row {
   display: flex;
@@ -162,13 +172,21 @@ input, button, select, textarea {
   justify-content: space-between;
   gap: 8px;
 }
-.lesson-item__meta { font-size: 0.95em; }
-.lesson-item__actions button { width: auto; }
+.lesson-item__meta {
+  font-size: 0.95em;
+}
+.lesson-item__actions button {
+  width: auto;
+}
 
 /* התאמות למסכים נמוכים */
 @media (max-height: 700px) {
-  .modal-content { height: 80vh; }
-  #modal-video { height: calc(80vh - 50px); }
+  .modal-content {
+    height: 80vh;
+  }
+  #modal-video {
+    height: calc(80vh - 50px);
+  }
 }
 
 /* התאמות נוספות למובייל */
@@ -176,28 +194,32 @@ input, button, select, textarea {
   body {
     font-size: 14px;
   }
-  
-  input, button, select, textarea {
+
+  input,
+  button,
+  select,
+  textarea {
     font-size: 16px; /* מונע זום אוטומטי באייפון */
     max-width: 100%;
   }
-  
+
   .lesson-card {
-    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   }
-  
+
   .lesson-card:hover {
     transform: none; /* מבטל אפקט hover במובייל */
   }
-  
+
   .lesson-meta p {
     margin: 5px 0;
     font-size: 0.9em;
   }
-  
+
   .views-count {
     font-size: 0.85em;
     margin-top: 8px;
+    z-index: -1;
   }
 }
 
@@ -205,11 +227,11 @@ input, button, select, textarea {
   body {
     font-size: 13px;
   }
-  
+
   .lesson-meta p {
     font-size: 0.85em;
   }
-  
+
   .views-count {
     font-size: 0.8em;
   }
