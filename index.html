@@ -1,437 +1,654 @@
 <!DOCTYPE html>
 <html lang="he" dir="rtl">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>מרכז שיעורי הר הבית</title>
-<link rel="stylesheet" href="style.css">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>מרכז שיעורי הר הבית</title>
+    <link rel="stylesheet" href="style.css" />
 
+    <link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png" />
+    <link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png" />
+    <link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png" />
 
-<link rel="icon" type="image/png" sizes="32x32" href="favicon-32x32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="favicon-16x16.png">
-<link rel="apple-touch-icon" sizes="180x180" href="apple-touch-icon.png">
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
 
-
-
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-auth-compat.js"></script>
-
-
-
-<style>
-.background-image {
-  position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-  background: url('1.png') center center / cover no-repeat;
-  opacity: 0.3; z-index: -1;
-}
-.modal-content--summary { max-height: 80vh; overflow:auto; }
-.summary-btn { background:#ff9800; color:#fff; border:none; padding:6px 10px; border-radius:6px; cursor:pointer; font-size:0.9em; margin-top:6px; }
-.lesson-actions { display:flex; gap:8px; flex-wrap:wrap; margin-top:6px; }
-.modal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; z-index:1000; }
-.modal.show { display:flex; }
-.modal-content { position:relative; background:#fff; padding:20px; max-width:90%; max-height:90%; overflow:auto; border-radius:8px; }
-.modal-close { font-size:1.2rem; color:#555; background:transparent; border:none; cursor:pointer; position:absolute; top:8px; right:8px; line-height:1; }
-.modal-close:hover { color:#000; }
-
-#device-table { margin-top:20px; border-collapse: collapse; width: 100%; }
-#device-table th, #device-table td { border: 1px solid #ccc; padding: 6px; text-align: left; }
-#device-table th { background: #CD853F; color: white; }
-</style>
-</head>
-<body>
-
-<div class="background-image"></div>
-
-<link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
-
-<header>
-<script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
-
-  <img src="logo.png" alt="לוגו האתר" class="site-logo">
-  <h1>מרכז שיעורי הר הבית</h1>
-  <a href="admin.html" class="admin-link">כניסת מנהל</a>
-</header>
-
-<style>
-header { position: sticky; background: #CD853F; color: white; display: flex; align-items: center; justify-content: space-between; padding: 5px 20px; box-sizing: border-box; }
-.site-logo { height: 90px; width: auto; }
-h1 { font-family: 'Great Vibes', cursive; font-size: 60px; margin: 0; padding-left: 511px; white-space: nowrap; }
-.admin-link { color: white; text-decoration: none; }
-@media (max-width: 1200px) { h1 { font-size: 60px; padding-left: 300px; } }
-@media (max-width: 800px) { h1 { font-size: 40px; padding-left: 100px; } }
-</style>
-
-<div class="search-background">
-  <div class="search-container">
-    <input type="text" id="search" placeholder="חפש לפי נושא, שם שיעור או שם הרב...">
-  </div>
-</div>
-
-<style>
-.search-background { background-color: #CD853F; padding-top: 6px; padding-bottom: 6px; padding-left: 10px; padding-right: 550px; width: 100%; top: 20px; z-index: 100; }
-.search-container { width: 100%; max-width: 600px; }
-.search-container input { width: 100%; height: 40px; font-size: 18px; padding: 0 10px; box-sizing: border-box; }
-</style>
-
-<div style="display:flex; gap:10px; margin-bottom:20px; padding:0 10px; padding-top: 5px;">
-  <select id="category-select">
-    <option value="">כל הקטגוריות</option>
-    <option value="הלכה">הלכה</option>
-    <option value="אמונה">אמונה</option>
-    <option value="פרשת השבוע">פרשת השבוע</option>
-  </select>
-</div>
-
-<main id="lessons-container"></main>
-
-<!-- מודאל וידאו -->
-<div id="modal" class="modal" aria-hidden="true">
-  <div class="modal-content">
-    <button id="close-modal" class="modal-close" aria-label="סגור">×</button>
-    <iframe id="modal-video" width="100%" height="450" frameborder="0" allowfullscreen></iframe>
-  </div>
-</div>
-
-<!-- מודאל סיכום -->
-<div id="summary-modal" class="modal" aria-hidden="true">
-  <div class="modal-content modal-content--summary">
-    <button id="close-summary-modal" class="modal-close" aria-label="סגור">×</button>
-    <div id="summary-content"></div>
-  </div>
-</div>
-
-<script>
-	
-
-
-
-  // --- Firebase config ---
-  const firebaseConfig = {
-    apiKey: "AIzaSyA9CHKDvVmhPSv6U2UpVj-QGyriF5QDjk0",
-    authDomain: "har-habait-lessons.firebaseapp.com",
-    projectId: "har-habait-lessons",
-    storageBucket: "har-habait-lessons.appspot.com",
-    messagingSenderId: "518010109655",
-    appId: "1:518010109655:web:cd628123d6769aa87a7a92",
-    measurementId: "G-RSNSTT3QL8"
-  };
-
-
-
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-const auth = firebase.auth();
-
-/* === אלמנטים === */
-const container = document.getElementById('lessons-container');
-const searchInput = document.getElementById('search');
-const categorySelect = document.getElementById('category-select');
-const modal = document.getElementById('modal');
-const modalVideo = document.getElementById('modal-video');
-const closeModal = document.getElementById('close-modal');
-const summaryModal = document.getElementById('summary-modal');
-const summaryContent = document.getElementById('summary-content');
-const closeSummaryModal = document.getElementById('close-summary-modal');
-const adminDevicesDiv = document.getElementById('admin-devices');
-const deviceTableBody = document.getElementById('device-table-body');
-
-/* === מזהה וסוג מכשיר === */
-function getDeviceId() {
-  let id = localStorage.getItem("deviceId");
-  if (!id) {
-    id = 'device-' + Math.random().toString(36).substr(2, 16);
-    localStorage.setItem("deviceId", id);
-  }
-  return id;
-}
-function getDeviceType() {
-  const ua = navigator.userAgent;
-  if (/Mobi|Android/i.test(ua)) return "mobile";
-  if (/Tablet|iPad/i.test(ua)) return "tablet";
-  return "desktop";
-}
-const deviceId = getDeviceId();
-const deviceType = getDeviceType();
-
-/* === מסמך מונה === */
-const visitsDocRef = db.collection("siteStats").doc("visits");
-
-/* === עדכון כניסה === */
-async function incrementVisit() {
-  try {
-    await visitsDocRef.set({ count: firebase.firestore.FieldValue.increment(1) }, { merge: true });
-    const deviceRef = visitsDocRef.collection("devices").doc(deviceId);
-    await deviceRef.set({
-      deviceType,
-      count: firebase.firestore.FieldValue.increment(1),
-      lastVisit: firebase.firestore.FieldValue.serverTimestamp()
-    }, { merge: true });
-  } catch (err) {
-    console.error("שגיאה בעדכון מונה הכניסות:", err);
-  }
-}
-incrementVisit();
-
-/* === בדיקה אם מנהל מחובר === */
-auth.onAuthStateChanged(user => {
-  if(user && user.email === "glasser.avraham@gmail.com") {
-    adminDevicesDiv.style.display = 'block';
-    visitsDocRef.collection("devices").onSnapshot(snapshot => {
-      deviceTableBody.innerHTML = '';
-      if(snapshot.empty){
-        deviceTableBody.innerHTML = '<tr><td colspan="4">לא נמצאו נתונים</td></tr>';
-        return;
+    <style>
+      .background-image {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: url("1.png") center center / cover no-repeat;
+        opacity: 0.3;
+        z-index: -1;
       }
-      snapshot.forEach(doc => {
-        const data = doc.data();
-        const lastVisit = data.lastVisit?.toDate ? data.lastVisit.toDate().toLocaleString('he-IL') : '';
-        const tr = document.createElement('tr');
-        tr.innerHTML = `
+      .modal-content--summary {
+        max-height: 80vh;
+        overflow-y: auto;
+      }
+      .summary-btn {
+        background: #ff9800;
+        color: #fff;
+        border: none;
+        padding: 6px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9em;
+        margin-top: 6px;
+      }
+      .lesson-actions {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+        margin-top: 6px;
+      }
+      .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
+      .modal.show {
+        display: flex;
+      }
+      .modal-content {
+        position: relative;
+        background: #fff;
+        padding: 20px;
+        max-width: 90%;
+        max-height: 90%;
+        overflow-y: auto;
+        border-radius: 8px;
+      }
+      .modal-close {
+        font-size: 1.2rem;
+        color: #555;
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        line-height: 1;
+      }
+      .modal-close:hover {
+        color: #000;
+      }
+
+      #device-table {
+        margin-top: 20px;
+        border-collapse: collapse;
+        width: 100%;
+      }
+      #device-table th,
+      #device-table td {
+        border: 1px solid #ccc;
+        padding: 6px;
+        text-align: left;
+      }
+      #device-table th {
+        background: #cd853f;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="background-image"></div>
+
+    <link
+      href="                                                                 "
+      rel="stylesheet"
+    />
+
+    <header>
+      <script src="https://cdn.jsdelivr.net/npm/fuse.js@6.6.2"></script>
+      <img src="logo.png" alt="לוגו האתר" class="site-logo" />
+      <h1>מרכז שיעורי הר הבית</h1>
+      <a href="admin.html" class="admin-link">כניסת מנהל</a>
+    </header>
+
+    <style>
+      body {
+        padding-top: 90px; /* תתאים לגובה האמיתי של ה-header */
+      }
+
+      header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        background: #cd853f;
+        color: white;
+        display: flex;
+        align-items: center;
+        justify-content: space-between; /* יפרוס את שלושת האלמנטים */
+        padding: 0 0px;
+        padding-top: 8px;
+        padding-bottom: 8px;
+        box-sizing: border-box;
+        z-index: 100000;
+      }
+
+      .site-logo {
+        height: 70px;
+        width: auto;
+        padding-right: 5px;
+      }
+
+      h1 {
+        font-family: "Great Vibes", cursive;
+        font-size: 55px;
+        margin: 0;
+        flex: 1; /* גורם לכותרת לתפוס מקום באמצע */
+        text-align: center;
+      }
+
+      .admin-link {
+        color: white;
+        text-decoration: none;
+        background: #cc9259;
+        padding: 6px 12px;
+        border-radius: 8px;
+        font-size: 16px;
+        white-space: nowrap; /* שלא ישבר שורה */
+      }
+
+      @media (max-width: 1200px) {
+        h1 {
+          font-size: 60px;
+          padding-left: 300px;
+        }
+      }
+      @media (max-width: 800px) {
+        h1 {
+          font-size: 40px;
+          padding-left: 100px;
+        }
+      }
+    </style>
+
+    <div class="search-background">
+      <div class="search-container">
+        <input type="text" id="search" placeholder="חפש..." />
+      </div>
+    </div>
+
+    <style>
+      .search-background {
+        background-color: #cd853f;
+        padding: 6px 10px; /* מקצר את הקוד */
+        width: 100%;
+        top: 20px;
+        z-index: 100;
+        display: flex; /* מפעיל flexbox */
+        justify-content: right; /* מרכז לרוחב */
+      }
+      .search-container {
+        width: 100%;
+        max-width: 600px; /* החיפוש לא יחרוג */
+      }
+      .search-container input {
+        width: 100%;
+        height: 40px;
+        font-size: 18px;
+        padding: 0 10px;
+        box-sizing: border-box;
+      }
+    </style>
+
+    <div
+      style="
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        padding: 0 10px;
+        padding-top: 5px;
+      "
+    >
+      <select id="category-select">
+        <option value="">כל הקטגוריות</option>
+        <option value="הלכה">הלכה</option>
+        <option value="אמונה">אמונה</option>
+        <option value="פרשת השבוע">פרשת השבוע</option>
+      </select>
+    </div>
+
+    <main id="lessons-container"></main>
+
+    <!-- מודאל וידאו -->
+    <div id="modal" class="modal" aria-hidden="true">
+      <div class="modal-content">
+        <button id="close-modal" class="modal-close" aria-label="סגור">
+          ×
+        </button>
+        <iframe
+          id="modal-video"
+          width="100%"
+          height="450"
+          frameborder="0"
+          allowfullscreen
+        ></iframe>
+      </div>
+    </div>
+
+    <!-- מודאל סיכום -->
+    <div id="summary-modal" class="modal" aria-hidden="true">
+      <div class="modal-content modal-content--summary">
+        <button id="close-summary-modal" class="modal-close" aria-label="סגור">
+          ×
+        </button>
+        <div id="summary-content"></div>
+      </div>
+    </div>
+
+    <script>
+      // --- Firebase config ---
+      const firebaseConfig = {
+        apiKey: "AIzaSyA9CHKDvVmhPSv6U2UpVj-QGyriF5QDjk0",
+        authDomain: "har-habait-lessons.firebaseapp.com",
+        projectId: "har-habait-lessons",
+        storageBucket: "har-habait-lessons.appspot.com",
+        messagingSenderId: "518010109655",
+        appId: "1:518010109655:web:cd628123d6769aa87a7a92",
+        measurementId: "G-RSNSTT3QL8",
+      };
+
+      firebase.initializeApp(firebaseConfig);
+      const db = firebase.firestore();
+      const auth = firebase.auth();
+
+      /* === אלמנטים === */
+      const container = document.getElementById("lessons-container");
+      const searchInput = document.getElementById("search");
+      const categorySelect = document.getElementById("category-select");
+      const modal = document.getElementById("modal");
+      const modalVideo = document.getElementById("modal-video");
+      const closeModal = document.getElementById("close-modal");
+      const summaryModal = document.getElementById("summary-modal");
+      const summaryContent = document.getElementById("summary-content");
+      const closeSummaryModal = document.getElementById("close-summary-modal");
+      const adminDevicesDiv = document.getElementById("admin-devices");
+      const deviceTableBody = document.getElementById("device-table-body");
+
+      /* === מזהה וסוג מכשיר === */
+      function getDeviceId() {
+        let id = localStorage.getItem("deviceId");
+        if (!id) {
+          id = "device-" + Math.random().toString(36).substr(2, 16);
+          localStorage.setItem("deviceId", id);
+        }
+        return id;
+      }
+      function getDeviceType() {
+        const ua = navigator.userAgent;
+        if (/Mobi|Android/i.test(ua)) return "mobile";
+        if (/Tablet|iPad/i.test(ua)) return "tablet";
+        return "desktop";
+      }
+      const deviceId = getDeviceId();
+      const deviceType = getDeviceType();
+
+      /* === מסמך מונה === */
+      const visitsDocRef = db.collection("siteStats").doc("visits");
+
+      /* === עדכון כניסה === */
+      async function incrementVisit() {
+        try {
+          await visitsDocRef.set(
+            { count: firebase.firestore.FieldValue.increment(1) },
+            { merge: true }
+          );
+          const deviceRef = visitsDocRef.collection("devices").doc(deviceId);
+          await deviceRef.set(
+            {
+              deviceType,
+              count: firebase.firestore.FieldValue.increment(1),
+              lastVisit: firebase.firestore.FieldValue.serverTimestamp(),
+            },
+            { merge: true }
+          );
+        } catch (err) {
+          console.error("שגיאה בעדכון מונה הכניסות:", err);
+        }
+      }
+      incrementVisit();
+
+      /* === בדיקה אם מנהל מחובר === */
+      auth.onAuthStateChanged((user) => {
+        if (user && user.email === "glasser.avraham@gmail.com") {
+          adminDevicesDiv.style.display = "block";
+          visitsDocRef.collection("devices").onSnapshot((snapshot) => {
+            deviceTableBody.innerHTML = "";
+            if (snapshot.empty) {
+              deviceTableBody.innerHTML =
+                '<tr><td colspan="4">לא נמצאו נתונים</td></tr>';
+              return;
+            }
+            snapshot.forEach((doc) => {
+              const data = doc.data();
+              const lastVisit = data.lastVisit?.toDate
+                ? data.lastVisit.toDate().toLocaleString("he-IL")
+                : "";
+              const tr = document.createElement("tr");
+              tr.innerHTML = `
           <td>${doc.id}</td>
-          <td>${data.deviceType || ''}</td>
+          <td>${data.deviceType || ""}</td>
           <td>${data.count || 0}</td>
           <td>${lastVisit}</td>
         `;
-        deviceTableBody.appendChild(tr);
+              deviceTableBody.appendChild(tr);
+            });
+          });
+        }
       });
-    });
-  }
-});
 
-/* === פונקציית עדכון צפיות עם בקרת מכשיר === */
-async function incrementLessonViews(lessonId) {
-  try {
-    const lessonRef = db.collection('lessons').doc(lessonId);
-    const deviceRef = lessonRef.collection('devices').doc(deviceId);
-    const deviceDoc = await deviceRef.get();
-    const now = Date.now();
+      /* === פונקציית עדכון צפיות עם בקרת מכשיר === */
+      async function incrementLessonViews(lessonId) {
+        try {
+          const lessonRef = db.collection("lessons").doc(lessonId);
+          const deviceRef = lessonRef.collection("devices").doc(deviceId);
+          const deviceDoc = await deviceRef.get();
+          const now = Date.now();
 
-    if(deviceDoc.exists) {
-      const lastView = deviceDoc.data().lastView?.toMillis() || 0;
-      if(now - lastView < 60000) return; // לא מעדכן אם פחות מדקה
-    }
+          if (deviceDoc.exists) {
+            const lastView = deviceDoc.data().lastView?.toMillis() || 0;
+            if (now - lastView < 60000) return; // לא מעדכן אם פחות מדקה
+          }
 
-    await db.runTransaction(async (transaction) => {
-      const lessonDoc = await transaction.get(lessonRef);
-      if (!lessonDoc.exists) {
-        transaction.set(lessonRef, { views: 1 });
-      } else {
-        transaction.update(lessonRef, { views: firebase.firestore.FieldValue.increment(1) });
+          await db.runTransaction(async (transaction) => {
+            const lessonDoc = await transaction.get(lessonRef);
+            if (!lessonDoc.exists) {
+              transaction.set(lessonRef, { views: 1 });
+            } else {
+              transaction.update(lessonRef, {
+                views: firebase.firestore.FieldValue.increment(1),
+              });
+            }
+            transaction.set(
+              deviceRef,
+              { lastView: firebase.firestore.Timestamp.now() },
+              { merge: true }
+            );
+          });
+
+          const lessonCard = document.querySelector(
+            `.lesson-card[data-id="${lessonId}"] .views-count`
+          );
+          if (lessonCard) {
+            let current =
+              parseInt(lessonCard.textContent.replace(/\D/g, "")) || 0;
+            lessonCard.textContent = `צפיות: ${current + 1}`;
+          }
+        } catch (err) {
+          console.error("שגיאה בעדכון צפיות:", err);
+        }
       }
-      transaction.set(deviceRef, { lastView: firebase.firestore.Timestamp.now() }, { merge: true });
-    });
 
-    const lessonCard = document.querySelector(`.lesson-card[data-id="${lessonId}"] .views-count`);
-    if(lessonCard) {
-      let current = parseInt(lessonCard.textContent.replace(/\D/g,'')) || 0;
-      lessonCard.textContent = `צפיות: ${current + 1}`;
-    }
+      /* === שאר הקוד לשיעורים, חיפוש וסינון === */
+      function normalizeHebrewBasic(str) {
+        if (!str) return "";
+        return String(str)
+          .normalize("NFKD")
+          .replace(/[\u0591-\u05C7]/g, "")
+          .replace(/<[^>]+>/g, " ")
+          .replace(/[\"'’”“.,!?()\-–—:;[\]{}]/g, " ")
+          .replace(/\s+/g, " ")
+          .trim()
+          .toLowerCase();
+      }
 
-  } catch(err) {
-    console.error('שגיאה בעדכון צפיות:', err);
-  }
-}
+      let allLessons = [];
+      let fuse = null;
 
-/* === שאר הקוד לשיעורים, חיפוש וסינון === */
-function normalizeHebrewBasic(str) {
-  if (!str) return "";
-  return String(str)
-    .normalize("NFKD")
-    .replace(/[\u0591-\u05C7]/g, "")
-    .replace(/<[^>]+>/g, " ")
-    .replace(/[\"'’”“.,!?()\-–—:;[\]{}]/g, " ")
-    .replace(/\s+/g, " ")
-    .trim()
-    .toLowerCase();
-}
+      db.collection("lessons").onSnapshot((snapshot) => {
+        const arr = [];
+        snapshot.forEach((doc) => {
+          const d = doc.data();
+          d.id = doc.id;
+          d.titleNorm = normalizeHebrewBasic(d.title);
+          d.rabbiNorm = normalizeHebrewBasic(d.rabbi);
+          d.categoryNorm = normalizeHebrewBasic(d.category);
+          d.summaryNorm = normalizeHebrewBasic(d.summary);
+          if (d.views === undefined) d.views = 0; // מוודא שיש ערך צפיות
+          arr.push(d);
+        });
+        allLessons = arr;
+        fuse = new Fuse(allLessons, {
+          keys: [
+            { name: "titleNorm", weight: 0.5 },
+            { name: "summaryNorm", weight: 0.6 },
+            { name: "rabbiNorm", weight: 0.4 },
+            { name: "categoryNorm", weight: 0.2 },
+          ],
+          includeScore: true,
+          threshold: 0.35,
+          ignoreLocation: true,
+          minMatchCharLength: 2,
+        });
+        filterAndSortLessons();
+      });
 
-let allLessons = [];
-let fuse = null;
-
-db.collection("lessons").onSnapshot(snapshot => {
-  const arr = [];
-  snapshot.forEach(doc => {
-    const d = doc.data();
-    d.id = doc.id;
-    d.titleNorm = normalizeHebrewBasic(d.title);
-    d.rabbiNorm = normalizeHebrewBasic(d.rabbi);
-    d.categoryNorm = normalizeHebrewBasic(d.category);
-    d.summaryNorm = normalizeHebrewBasic(d.summary);
-    if(d.views === undefined) d.views = 0; // מוודא שיש ערך צפיות
-    arr.push(d);
-  });
-  allLessons = arr;
-  fuse = new Fuse(allLessons, {
-    keys: [
-      { name: 'titleNorm', weight: 0.5 },
-      { name: 'summaryNorm', weight: 0.6 },
-      { name: 'rabbiNorm', weight: 0.4 },
-      { name: 'categoryNorm', weight: 0.2 }
-    ],
-    includeScore: true,
-    threshold: 0.35,
-    ignoreLocation: true,
-    minMatchCharLength: 2
-  });
-  filterAndSortLessons();
-});
-
-function renderLessons(lessons) {
-  container.innerHTML = '';
-  lessons.forEach(data => {
-    const videoID = data.youtube ? data.youtube.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/)?.[1] : null;
-    let dateStr = data.timestamp?.toDate ? data.timestamp.toDate().toLocaleDateString('he-IL') : "לא זמין";
-    const lessonDiv = document.createElement('div');
-    lessonDiv.className = 'lesson-card';
-    lessonDiv.dataset.id = data.id;
-    lessonDiv.innerHTML = `
-      <img src="${videoID ? `https://img.youtube.com/vi/${videoID}/hqdefault.jpg` : 'https://via.placeholder.com/320x180?text=No+Image'}" alt="${data.title || ""}">
+      function renderLessons(lessons) {
+        container.innerHTML = "";
+        lessons.forEach((data) => {
+          const videoID = data.youtube
+            ? data.youtube.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/)?.[1]
+            : null;
+          let dateStr = data.timestamp?.toDate
+            ? data.timestamp.toDate().toLocaleDateString("he-IL")
+            : "לא זמין";
+          const lessonDiv = document.createElement("div");
+          lessonDiv.className = "lesson-card";
+          lessonDiv.dataset.id = data.id;
+          lessonDiv.innerHTML = `
+      <img src="${
+        videoID
+          ? `https://img.youtube.com/vi/${videoID}/hqdefault.jpg`
+          : "                                                 "
+      }" alt="${data.title || ""}">
       <div class="lesson-meta">
         <h3>${data.title || ""}</h3>
         <p><strong>הרב:</strong> ${data.rabbi || ""}</p>
         <p><strong>קטגוריה:</strong> ${data.category || "לא סווג"}</p>
         <p><strong>תאריך:</strong> ${dateStr}</p>
         <div class="lesson-actions">
-          ${videoID ? `<button class="watch-btn" data-id="${data.id}">צפייה</button>` : ""}
-          ${data.summary ? `<button class="summary-btn" data-id="${data.id}">הצגת סיכום</button>` : ""}
+          ${
+            videoID
+              ? `<button class="watch-btn" data-id="${data.id}">צפייה</button>`
+              : ""
+          }
+          ${
+            data.summary
+              ? `<button class="summary-btn" data-id="${data.id}">הצגת סיכום</button>`
+              : ""
+          }
         </div>
         <p class="views-count"><strong>צפיות:</strong> ${data.views}</p>
       </div>
     `;
-    container.appendChild(lessonDiv);
-  });
-}
 
-/* === אירועים ללחיצה על כרטיסים וכפתורים === */
-container.addEventListener('click', (e) => {
-  const id = e.target.dataset?.id;
+          container.appendChild(lessonDiv);
+        });
+      }
 
-  // צפייה בכפתור
-  if (e.target.classList.contains('watch-btn')) {
-    const lesson = allLessons.find(l => l.id === id);
-    const videoID = lesson?.youtube?.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/)?.[1];
-    if(videoID) {
-      modalVideo.src = `https://www.youtube.com/embed/${videoID}`;
-      modal.classList.add('show');
-      modal.setAttribute('aria-hidden','false');
-      incrementLessonViews(id);
-    }
-    return;
-  }
+      /* === אירועים ללחיצה על כרטיסים וכפתורים === */
+      container.addEventListener("click", (e) => {
+        const id = e.target.dataset?.id;
 
-  // סיכום
-  if(e.target.classList.contains('summary-btn')) {
-    const lesson = allLessons.find(l => l.id === id);
-    if(lesson?.summary) {
-      summaryContent.innerHTML = lesson.summary;
-      summaryModal.classList.add('show');
-      summaryModal.setAttribute('aria-hidden','false');
-    }
-    return;
-  }
+        // צפייה בכפתור
+        if (e.target.classList.contains("watch-btn")) {
+          const lesson = allLessons.find((l) => l.id === id);
+          const videoID = lesson?.youtube?.match(
+            /(?:v=|\/)([a-zA-Z0-9_-]{11})/
+          )?.[1];
+          if (videoID) {
+            modalVideo.src = `https://www.youtube.com/embed/${videoID}?autoplay=1`;
+            modal.classList.add("show");
+            modal.setAttribute("aria-hidden", "false");
+            incrementLessonViews(id);
+          }
+          return;
+        }
 
-  // לחיצה על הכרטיס עצמו (ללא כפתורים)
-  const card = e.target.closest('.lesson-card');
-  if(!card) return;
-  const lesson = allLessons.find(l => l.id === card.dataset.id);
-  const videoID = lesson?.youtube?.match(/(?:v=|\/)([a-zA-Z0-9_-]{11})/)?.[1];
-  if(videoID) {
-    modalVideo.src = `https://www.youtube.com/embed/${videoID}`;
-    modal.classList.add('show');
-    modal.setAttribute('aria-hidden','false');
-    incrementLessonViews(lesson.id);
-  }
-});
+        // סיכום
+        if (e.target.classList.contains("summary-btn")) {
+          const lesson = allLessons.find((l) => l.id === id);
+          if (lesson?.summary) {
+            summaryContent.innerHTML = lesson.summary;
+            summaryModal.classList.add("show");
+            summaryModal.setAttribute("aria-hidden", "false");
+          }
+          return;
+        }
 
-/* === חיפוש וסינון === */
-function filterAndSortLessons() {
-  const rawSearch = searchInput.value || "";
-  const searchTerm = normalizeHebrewBasic(rawSearch);
-  const category = categorySelect.value;
-  let list;
-  if (searchTerm.length >= 1 && fuse) list = fuse.search(searchTerm).map(r => r.item);
-  else list = [...allLessons].sort((a,b)=> (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0));
-  if (category) list = list.filter(l => (l.category || "") === category);
-  if (searchTerm.length >= 1) {
-    list = list.map((item, idx) => ({ item, idx }))
-      .sort((a, b) => ((b.item.timestamp?.seconds||0) - (a.item.timestamp?.seconds||0)) || (a.idx-b.idx))
-      .map(x => x.item);
-  }
-  renderLessons(list);
-}
+        // לחיצה על הכרטיס עצמו (ללא כפתורים)
+        const card = e.target.closest(".lesson-card");
+        if (!card) return;
+        const lesson = allLessons.find((l) => l.id === card.dataset.id);
+        const videoID = lesson?.youtube?.match(
+          /(?:v=|\/)([a-zA-Z0-9_-]{11})/
+        )?.[1];
+        if (videoID) {
+          modalVideo.src = `https://www.youtube.com/embed/${videoID}?autoplay=1`;
+          modal.classList.add("show");
+          modal.setAttribute("aria-hidden", "false");
+          incrementLessonViews(lesson.id);
+        }
+      });
 
-searchInput.addEventListener('input', filterAndSortLessons);
-categorySelect.addEventListener('change', filterAndSortLessons);
+      /* === חיפוש וסינון === */
+      function filterAndSortLessons() {
+        const rawSearch = searchInput.value || "";
+        const searchTerm = normalizeHebrewBasic(rawSearch);
+        const category = categorySelect.value;
+        let list;
+        if (searchTerm.length >= 1 && fuse)
+          list = fuse.search(searchTerm).map((r) => r.item);
+        else
+          list = [...allLessons].sort(
+            (a, b) => (b.timestamp?.seconds || 0) - (a.timestamp?.seconds || 0)
+          );
+        if (category)
+          list = list.filter((l) => (l.category || "") === category);
+        if (searchTerm.length >= 1) {
+          list = list
+            .map((item, idx) => ({ item, idx }))
+            .sort(
+              (a, b) =>
+                (b.item.timestamp?.seconds || 0) -
+                  (a.item.timestamp?.seconds || 0) || a.idx - b.idx
+            )
+            .map((x) => x.item);
+        }
+        renderLessons(list);
+      }
 
-/* === סגירת מודאלים === */
-closeModal.addEventListener('click', () => { modalVideo.src=''; modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); });
-closeSummaryModal.addEventListener('click', () => { summaryModal.classList.remove('show'); summaryModal.setAttribute('aria-hidden','true'); });
-modal.addEventListener('click', (e)=>{ if(e.target===modal){ modalVideo.src=''; modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }});
-summaryModal.addEventListener('click', (e)=>{ if(e.target===summaryModal){ summaryModal.classList.remove('show'); summaryModal.setAttribute('aria-hidden','true'); }});
-</script>
+      searchInput.addEventListener("input", filterAndSortLessons);
+      categorySelect.addEventListener("change", filterAndSortLessons);
 
-<footer>
-  <div class="wave"></div>
-  <p>כל הזכויות שמורות © 2025 מרכז שיעורי הר הבית | לפרטים וליצירת קשר: 055-9962656 | glasser.avraham@gmail.com</p>
-</footer>
+      /* === סגירת מודאלים === */
+      closeModal.addEventListener("click", () => {
+        modalVideo.src = "";
+        modal.classList.remove("show");
+        modal.setAttribute("aria-hidden", "true");
+      });
+      closeSummaryModal.addEventListener("click", () => {
+        summaryModal.classList.remove("show");
+        summaryModal.setAttribute("aria-hidden", "true");
+      });
+      modal.addEventListener("click", (e) => {
+        if (e.target === modal) {
+          modalVideo.src = "";
+          modal.classList.remove("show");
+          modal.setAttribute("aria-hidden", "true");
+        }
+      });
+      summaryModal.addEventListener("click", (e) => {
+        if (e.target === summaryModal) {
+          summaryModal.classList.remove("show");
+          summaryModal.setAttribute("aria-hidden", "true");
+        }
+      });
+    </script>
 
-<style>
-footer { position: relative; background: #CD853F; color: white; text-align: center; padding: 3px; }
-</style>
+    <footer>
+      <div class="wave"></div>
+      <p>
+        כל הזכויות שמורות © 2025 מרכז שיעורי הר הבית | לפרטים וליצירת קשר:
+        055-9962656 | glasser.avraham@gmail.com
+      </p>
+    </footer>
 
+    <style>
+      footer {
+        position: relative;
+        background: #cd853f;
+        color: white;
+        text-align: center;
+        padding: 3px;
+      }
+    </style>
 
+    <!-- מודאל תמונה בעת כניסה -->
+    <div id="entry-modal" class="entry-modal">
+      <img src="stop.png" alt="אזהרה" class="entry-modal-img" />
+    </div>
 
+    <style>
+      /* שכבת הרקע המטושש */
+      .entry-modal {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        backdrop-filter: blur(6px); /* טשטוש */
+        background: rgba(0, 0, 0, 0.5); /* כהות */
+        display: flex;
+        justify-content: right;
+        align-items: flex-start; /* תמונה קרובה לראש הדף */
+        padding-top: 40px;
+        z-index: 2000000;
+      }
 
+      /* התמונה עצמה */
+      .entry-modal-img {
+        max-width: 90%;
+        max-height: 90%;
+        border-radius: 8px;
+      }
 
-<!-- מודאל תמונה בעת כניסה -->
-<div id="entry-modal" class="entry-modal">
-  <img src="stop.png" alt="אזהרה" class="entry-modal-img">
-</div>
+      /* אנימציית הופעה */
+      .entry-modal {
+        animation: fadeIn 0.3s ease-out;
+      }
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
 
-<style>
-/* שכבת הרקע המטושש */
-.entry-modal {
-  position: fixed;
-  top: 0; left: 0;
-  width: 100%; height: 100%;
-  backdrop-filter: blur(6px); /* טשטוש */
-  background: rgba(0, 0, 0, 0.5); /* כהות */
-  display: flex;
-  justify-content: center;
-  align-items: flex-start; /* תמונה קרובה לראש הדף */
-  padding-top: 40px;
-  z-index: 2000;
-}
-
-/* התמונה עצמה */
-.entry-modal-img {
-  max-width: 90%;
-  max-height: 90%;
-  border-radius: 8px;
-}
-
-/* אנימציית הופעה */
-.entry-modal {
-  animation: fadeIn 0.3s ease-out;
-}
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
-}
-</style>
-
-<script>
-// סגירת המודאל בלחיצה בכל מקום במסך
-document.getElementById("entry-modal").addEventListener("click", function() {
-  this.remove();
-});
-</script>
-
-
-
-</body>
+    <script>
+      // סגירת המודאל בלחיצה בכל מקום במסך
+      document
+        .getElementById("entry-modal")
+        .addEventListener("click", function () {
+          this.remove();
+        });
+    </script>
+  </body>
 </html>
